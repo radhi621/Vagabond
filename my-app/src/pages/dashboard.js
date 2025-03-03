@@ -9,6 +9,9 @@ export default function Dashboard() {
   const [image, setImage] = useState("");
   const [category, setCategory] = useState(""); // For merch
   const [price, setPrice] = useState(""); // For merch
+  const [position, setPosition] = useState(""); // Job-specific field
+  const [location, setLocation] = useState(""); // Job-specific field
+  const [salary, setSalary] = useState(""); // Job-specific field
   const [selectedPage, setSelectedPage] = useState("games");
 
   useEffect(() => {
@@ -20,7 +23,18 @@ export default function Dashboard() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newItem = selectedPage === "merch" ? { title, description, image, category, price } : { title, description, image };
+    let newItem = {};
+    // If the selected page is "jobs", send only title, location, and type
+    if (selectedPage === "jobs") {
+      newItem = { title, location, type: position }; // Only required job fields
+    } else if (selectedPage === "merch") {
+      // For merch, send title, description, image, category, and price
+      newItem = { title, description, image, category, price };
+    } else {
+      // For other pages (like "games"), send title, description, and image
+      newItem = { title, description, image };
+    }
+
 
     fetch(`http://localhost:5000/api/${selectedPage}`, {
       method: "POST",
@@ -40,11 +54,15 @@ export default function Dashboard() {
         setImage("");
         setCategory("");
         setPrice("");
+        setPosition("");
+        setLocation("");
+        setSalary("");
       })
       .catch((error) => console.error("Error adding item:", error));
   };
 
   const deleteItem = (id) => {
+    console.log("Deleting item with ID:", id);  // Log the ID being passed
     fetch(`http://localhost:5000/api/${selectedPage}/${id}`, {
       method: "DELETE",
     })
@@ -80,7 +98,7 @@ export default function Dashboard() {
               className="form-control"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              required
+              
             ></textarea>
           </div>
           <div className="mb-3">
@@ -90,7 +108,7 @@ export default function Dashboard() {
               className="form-control"
               value={image}
               onChange={(e) => setImage(e.target.value)}
-              required
+              
             />
           </div>
           <div className="mb-3">
@@ -103,6 +121,7 @@ export default function Dashboard() {
               <option value="games">Games</option>
               <option value="news">News</option>
               <option value="merch">Merch</option>
+              <option value="jobs">Jobs</option>
             </select>
           </div>
 
@@ -132,6 +151,37 @@ export default function Dashboard() {
             </>
           )}
 
+
+
+
+
+
+
+          {selectedPage === "jobs" && (
+            <>
+              <div className="mb-3">
+                <label className="form-label">Location</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Position (Type)</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={position}
+                  onChange={(e) => setPosition(e.target.value)}
+                  required
+                />
+              </div>
+            </>
+          )}
+
           <button type="submit" className="btn btn-danger">Add Item</button>
         </form>
 
@@ -145,7 +195,15 @@ export default function Dashboard() {
                   <h5 className="card-title fw-bold mb-3">{item.title}</h5>
                   <p className="card-text text-light opacity-75">{item.description}</p>
                   {selectedPage === "merch" && <p className="fw-bold">Category: {item.category} | Price: ${item.price}</p>}
-                  <button className="btn btn-danger mt-3" onClick={() => deleteItem(item._id)}>Delete</button>
+                  {selectedPage === "jobs" && (
+                    <>
+                      <p className="text-danger mb-2">{item.location}</p>
+                      <p className="text-secondary mb-0">{item.type}</p>
+                    </>
+                  )}
+                  <button className="btn btn-danger mt-3" onClick={() => deleteItem(item._id)}>
+                    Delete
+                  </button>
                 </div>
               </div>
             </div>

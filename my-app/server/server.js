@@ -43,9 +43,17 @@ const merchSchema = new mongoose.Schema({
   price: { type: Number, required: true } // Add price field
 });
 
+const jobSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  location: { type: String, required: true },
+  type: { type: String, required: true }, // Full-Time, Part-Time, etc.
+  description: { type: String, required: false },
+});
+
 const Merch = mongoose.model("Merch", merchSchema);
 const Game = mongoose.model("Game", gameSchema);
 const News = mongoose.model("News", newsSchema);
+const Job = mongoose.model("Job", jobSchema);
 
 // Routes for Games
 app.get("/api/games", async (req, res) => {           // fetches data from server (read)
@@ -172,6 +180,55 @@ app.delete("/api/merch/:id", async (req, res) => {
   } catch (err) {
     console.error("Error deleting merch:", err);
     res.status(500).json({ error: "Failed to delete merch" });
+  }
+});
+
+
+
+
+
+
+
+// POST /api/jobs - Create a new job
+app.post("/api/jobs", async (req, res) => {
+  const { title, location, type } = req.body;
+  if (!title || !location || !type) {
+    return res.status(400).json({ error: "All fields (title, location, type) are required" });
+  }
+
+  try {
+    const newJob = new Job({ title, location, type });
+    await newJob.save();
+    res.status(201).json(newJob);  // Respond with the created job and status 201
+  } catch (err) {
+    console.error("Error adding job:", err);
+    res.status(500).json({ error: "Failed to add job" });
+  }
+});
+
+// GET /api/jobs - Fetch all jobs
+app.get("/api/jobs", async (req, res) => {
+  try {
+    const jobs = await Job.find();
+    res.json(jobs);
+  } catch (err) {
+    console.error("Error fetching jobs:", err);
+    res.status(500).json({ error: "Failed to fetch jobs" });
+  }
+});
+
+// DELETE /api/jobs/:id - Delete a job by ID
+app.delete("/api/jobs/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await Job.findByIdAndDelete(id);
+    if (!result) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    res.json({ message: "Job deleted successfully", job: result });
+  } catch (err) {
+    console.error("Error deleting job:", err);
+    res.status(500).json({ error: "Failed to delete job" });
   }
 });
 
