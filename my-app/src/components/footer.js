@@ -13,7 +13,6 @@ export default function Footer() {
                                 <li><a href="#" className="text-light text-decoration-none">Discord</a></li>
                                 <li><a href="#" className="text-light text-decoration-none">Reddit</a></li>
                                 <li><a href="#" className="text-light text-decoration-none">Contact Us</a></li>
-                                <li><a href="#" className="text-light text-decoration-none">Press Kit</a></li>
                             </ul>
                         </div>
                         <div className="col-12 col-md-3 mb-3 mb-md-0">
@@ -34,7 +33,7 @@ export default function Footer() {
                         </div>
                     </div>
                     <div className="text-center mt-3">
-                        <small>&copy; 2025 Astarte Industries Inc. All Rights Reserved.</small>
+                        <small>&copy; 2025 Vagabond Studio. All Rights Reserved.</small>
                     </div>
                 </div>
             </footer>

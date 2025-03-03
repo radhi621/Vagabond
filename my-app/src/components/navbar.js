@@ -1,38 +1,49 @@
-import '../styles/navbar.css';
-
 export default function Navbar() {
     return (
-        <nav className="navbar navbar-expand-lg bg-black navbar-dark">
+        <nav className="navbar navbar-expand-lg bg-black navbar-dark border-bottom sticky-top">
             <div className="container-fluid">
+                {/* Logo */}
                 <a className="navbar-brand" href="/">
                     <img src="/images/logo.png" alt="Logo" height="50" className="ms-3" />
                 </a>
-                <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                {/* Toggler for Mobile View */}
+                <button
+                    className="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarNav"
+                    aria-controls="navbarNav"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation"
+                >
                     <span className="navbar-toggler-icon"></span>
                 </button>
-                <div className="collapse navbar-collapse justify-content-center" id="navbarNav">
-                    <ul className="navbar-nav">
-                        <li className="nav-item me-3">
-                            <a className="nav-link" href="/Games">Games</a>
+                {/* Navbar Content */}
+                <div className="collapse navbar-collapse text-center " id="navbarNav">
+                    {/* Centered Links */}
+                    <ul className="navbar-nav mx-auto">
+                        <li className="nav-item">
+                            <a className="nav-link mx-3" href="/Games">GAMES</a>
                         </li>
-                        <li className="nav-item me-3">
-                            <a className="nav-link" href="/News">News</a>
+                        <li className="nav-item">
+                            <a className="nav-link mx-3" href="/News">NEWS</a>
                         </li>
-                        <li className="nav-item me-3">
-                            <a className="nav-link" href="/merch">Merch</a>
+                        <li className="nav-item">
+                            <a className="nav-link mx-3" href="/merch">MERCH</a>
                         </li>
-                        <li className="nav-item me-3">
-                            <a className="nav-link" href="/Hiring">We're Hiring</a>
+                        <li className="nav-item">
+                            <a className="nav-link mx-3" href="/Hiring">WE'RE HIRING</a>
                         </li>
-                        <li className="nav-item me-3">
-                            <a className="nav-link" href="/Contact">Contact</a>
+                        <li className="nav-item">
+                            <a className="nav-link mx-3" href="/Contact">CONTACT</a>
                         </li>
                     </ul>
-                    <ul className="navbar-nav ms-3">
-                        <button className="nav-item bg-danger text-white border border-0 ms-5">
-                            <a className="nav-link" href="#"><i className="fa-brands fa-discord"></i> JOIN OUR DISCORD</a>
+                    {/* Join Discord Button */}
+                    <div className="text-center">
+                        <button className="btn bg-danger text-white px-4 py-2 d-inline-flex align-items-center border-0">
+                            <i className="fa-brands fa-discord me-2"></i> JOIN OUR DISCORD
                         </button>
-                    </ul>
+                    </div>
                 </div>
             </div>
         </nav>

@@ -35,7 +35,7 @@ export default function Hiring() {
         </div>
         <div className="container text-center py-5">
             <div className="row">
-                <div className="col ">
+                <div className="col p-5">
                     <h1>JOIN OUR TEAM</h1>
                     <br></br>
                     <div className="border-bottom border-3"></div>
@@ -51,13 +51,13 @@ export default function Hiring() {
         <div className="container-fluid bg-black py-4">
   <div className="row justify-content-center g-4">
 
-    <div className="col-lg-8">
+    <div className="col-lg-8 mb-5">
       <div className="card bg-transparent mb-4 border border-secondary">
         <div className="card-body p-4">
           <div className="d-flex justify-content-between align-items-start">
             <div>
               <h2 className="text-white fw-bold mb-2">SENIOR UNREAL ENGINE DEVELOPER</h2>
-              <p className="text-info mb-2">Remote / Scottsdale, AZ</p>
+              <p className="text-danger mb-2">Remote / Scottsdale, AZ</p>
               <p className="text-secondary mb-0">Full-Time</p>
             </div>
             <a href="#" className="btn btn-danger text-light px-4 fw-bold">LEARN MORE</a>
@@ -70,7 +70,7 @@ export default function Hiring() {
           <div className="d-flex justify-content-between align-items-start">
             <div>
               <h2 className="text-white fw-bold mb-2">UNREAL ENGINE DEVELOPER</h2>
-              <p className="text-info mb-2">Remote / Scottsdale, AZ</p>
+              <p className="text-danger mb-2">Remote / Scottsdale, AZ</p>
               <p className="text-secondary mb-0">Full-Time</p>
             </div>
             <a href="#" className="btn btn-danger text-light px-4 fw-bold">LEARN MORE</a>
@@ -83,7 +83,7 @@ export default function Hiring() {
           <div className="d-flex justify-content-between align-items-start">
             <div>
               <h2 className="text-white fw-bold mb-2">LEVEL DESIGNER</h2>
-              <p className="text-info mb-2">Remote / Scottsdale, AZ</p>
+              <p className="text-danger mb-2">Remote / Scottsdale, AZ</p>
               <p className="text-secondary mb-0">Full-Time</p>
             </div>
             <a href="#" className="btn btn-danger text-light px-4 fw-bold">LEARN MORE</a>
@@ -96,7 +96,7 @@ export default function Hiring() {
           <div className="d-flex justify-content-between align-items-start">
             <div>
               <h2 className="text-white fw-bold mb-2">SENIOR ENVIRONMENT ARTIST</h2>
-              <p className="text-info mb-2">Remote / Scottsdale, AZ</p>
+              <p className="text-danger mb-2">Remote / Scottsdale, AZ</p>
               <p className="text-secondary mb-0">Full-Time</p>
             </div>
             <a href="#" className="btn btn-danger text-light px-4 fw-bold">LEARN MORE</a>

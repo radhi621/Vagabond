@@ -9,8 +9,6 @@ export default function Main() {
         <Navbar />
         <Carousel />
         <Maincard />
-        <Maincard />
-        <Maincard />
         <Footer />
         </>
     );

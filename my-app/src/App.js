@@ -6,11 +6,13 @@ import News from './pages/news';
 import Hiring from './pages/hiring';
 import Contact from './pages/contact';
 import Games from './pages/games';
+import Dashboard from './pages/dashboard';
 
 function App() {
   return (
     <Router>
         <Routes>
+        <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/" element={<Main />} />
             <Route path="/Games" element={<Games />} />
             <Route path="/news" element={<News />} />
