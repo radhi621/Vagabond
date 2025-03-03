@@ -2,7 +2,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cors = require("cors");
-// const URL = "mongodb+srv://rofthaziu:NjFc94xPgDTxMLAu@vagabondstudio.f7v1i.mongodb.net/vagabondstudio?retryWrites=true&w=majority";
 const app = express();
 
 require('dotenv').config();
