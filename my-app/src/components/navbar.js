@@ -25,9 +25,18 @@ export default function Navbar() {
                         <li className="nav-item">
                             <a className="nav-link mx-3" href="/Games">GAMES</a>
                         </li>
-                        <li className="nav-item">
-                            <a className="nav-link mx-3" href="/News">NEWS</a>
+
+                        {/* Dropdown for News */}
+                        <li className="nav-item dropdown">
+                        <a className="nav-link dropdown-toggle mx-3" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            NEWS
+                        </a>
+                        <ul className="dropdown-menu bg-black">
+                            <li><a className="dropdown-item text-white bg-transparent" href="/news">Our News</a></li>
+                            <li><a className="dropdown-item text-white bg-transparent" href="/gamingnews">Gaming News</a></li>
+                        </ul>
                         </li>
+
                         <li className="nav-item">
                             <a className="nav-link mx-3" href="/merch">MERCH</a>
                         </li>

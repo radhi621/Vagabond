@@ -6,6 +6,7 @@ export default function Merch() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [imageHeight, setImageHeight] = useState(window.innerWidth <= 576 ? "70vh" : "50vh");
 
   useEffect(() => {
     fetch("http://localhost:5000/api/merch")
@@ -26,24 +27,30 @@ export default function Merch() {
     <>
       <Navbar />
       <div className="bg-black text-white">
-        <div className="container-fluid p-0">
-          <div className="position-relative">
-            <img
-              src="/images/carditem.jpg"
-              alt="Games"
-              className="img-fluid w-100"
-              style={{ height: "50vh", objectFit: "cover", filter: "brightness(0.7)" }}
-            />
-            <div className="position-absolute top-50 start-50 translate-middle text-center">
-              <h1 className="display-4 fw-bold text-uppercase">Merchandise</h1>
-              <p className="lead">Express your passion with our exclusive collection</p>
+        <div className="container-fluid" style={{ padding: 0 }}>
+          <div className="row">
+            <div className="col" style={{ padding: 0 }}>
+              <img
+                src="/images/carditem.jpg"
+                alt="Games"
+                className="img-fluid"
+                style={{
+                  objectFit: "cover",
+                  width: "100%",
+                  height: imageHeight,
+                }}
+              />
             </div>
           </div>
         </div>
-
-        <div className="container py-5">
-          <h2 className="text-center mb-4">CHECK OUT OUR MERCH</h2>
-          <div className="border-bottom border-danger border-3 w-50 mx-auto mb-5"></div>
+         <div className="container text-center py-5">
+             <div className="row mb-5">
+                <div className="col p-5">
+                     <h1>CHECK OUT OUR GAMES</h1>
+                     <br></br>
+                    <div className="border-bottom border-3"></div>
+                 </div>
+             </div>
           
           <div className="row">
             <div className="col-md-3 mb-4">

@@ -54,10 +54,10 @@ export default function Hiring() {
         </div>
       </div>
 
-      <div className="container-fluid bg-black py-4">
+      <div className="container-fluid bg-black py-2">
         <div className="row justify-content-center g-4">
           {jobs.map((job) => (
-            <div className="col-lg-8 mb-5" key={job._id}>
+            <div className="col-lg-7 mb-5" key={job._id}>
               <div className="card bg-transparent mb-4 border border-secondary">
                 <div className="card-body p-4">
                   <div className="d-flex justify-content-between align-items-start">

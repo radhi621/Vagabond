@@ -19,17 +19,19 @@ export default function Games() {
         <>
             <Navbar />
             <div className="bg-black text-white">
-        <div className="container-fluid p-0">
-          <div className="position-relative">
-            <img
-              src="/images/carditem.jpg"
-              alt="Games"
-              className="img-fluid w-100"
-              style={{ height: "50vh", objectFit: "cover", filter: "brightness(0.7)" }}
-            />
-            <div className="position-absolute top-50 start-50 translate-middle text-center">
-              <h1 className="display-4 fw-bold text-uppercase">Merchandise</h1>
-              <p className="lead">Express your passion with our exclusive collection</p>
+        <div className="container-fluid" style={{ padding: 0 }}>
+          <div className="row">
+            <div className="col" style={{ padding: 0 }}>
+              <img
+                src="/images/carditem.jpg"
+                alt="Games"
+                className="img-fluid"
+                style={{
+                  objectFit: "cover",
+                  width: "100%",
+                  height: imageHeight,
+                }}
+              />
             </div>
           </div>
         </div>

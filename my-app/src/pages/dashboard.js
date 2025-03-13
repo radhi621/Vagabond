@@ -154,9 +154,7 @@ export default function Dashboard() {
 
 
 
-
-
-
+          {/* Show category and price fields only when adding jobs */}
           {selectedPage === "jobs" && (
             <>
               <div className="mb-3">

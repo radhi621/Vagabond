@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const app = express();
 
+
 require('dotenv').config();
 const URL = process.env.URL;
 console.log("MongoDB URL:", process.env.URL); // Debugging line
@@ -50,6 +51,16 @@ const jobSchema = new mongoose.Schema({
   description: { type: String, required: false },
 });
 
+const contactSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  subject: { type: String, required: true },
+  message: { type: String, required: true },
+  inquiryType: { type: String, required: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Contact = mongoose.model("Contact", contactSchema);
 const Merch = mongoose.model("Merch", merchSchema);
 const Game = mongoose.model("Game", gameSchema);
 const News = mongoose.model("News", newsSchema);
@@ -229,6 +240,51 @@ app.delete("/api/jobs/:id", async (req, res) => {
   } catch (err) {
     console.error("Error deleting job:", err);
     res.status(500).json({ error: "Failed to delete job" });
+  }
+});
+
+
+
+// Contact form submission endpoint
+app.post("/api/contact", async (req, res) => {
+  const { name, email, subject, message, inquiryType } = req.body;
+  // Validate required fields
+  if (!name || !email || !subject || !message || !inquiryType) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+  try {
+    // Create new contact submission
+    const newContact = new Contact({
+      name,
+      email,
+      subject,
+      message,
+      inquiryType
+    });
+    
+    // Save to database
+    await newContact.save();
+    
+    // Return success response
+    res.status(201).json({ 
+      success: true, 
+      message: "Contact form submitted successfully",
+      contact: newContact
+    });
+  } catch (err) {
+    console.error("Error submitting contact form:", err);
+    res.status(500).json({ error: "Failed to submit contact form" });
+  }
+});
+
+
+app.get("/api/contact", async (req, res) => {
+  try {
+    const contacts = await Contact.find().sort({ createdAt: -1 });
+    res.json(contacts);
+  } catch (err) {
+    console.error("Error fetching contact submissions:", err);
+    res.status(500).json({ error: "Failed to fetch contact submissions" });
   }
 });
 
