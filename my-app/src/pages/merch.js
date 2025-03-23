@@ -23,6 +23,24 @@ export default function Merch() {
     ? products
     : products.filter((product) => product.category === selectedCategory);
 
+    const handleBuyNow = async (productId) => {
+      try {
+        const response = await fetch('http://localhost:5000/api/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ productId }),
+        });
+        const data = await response.json();
+        if (data.url) {
+          window.location.href = data.url; // Redirect to Stripe checkout
+        } else {
+          alert("Failed to initiate payment.");
+        }
+      } catch (error) {
+        console.error("Error creating checkout session:", error);
+      }
+    };
+    
   return (
     <>
       <Navbar />
@@ -100,10 +118,13 @@ export default function Merch() {
                           <h5 className="card-title fw-bold">{product.title}</h5>
                           <p className="card-text flex-grow-1">{product.description}</p>
                           <div className="d-flex justify-content-between align-items-center mt-3">
-                            <p className="fw-bold fs-5 mb-0">${product.price}</p>
-                            <button className="btn btn-danger">
-                              <i className="bi bi-cart-plus me-2"></i>Buy Now
-                            </button>
+                          <button
+                            className="btn btn-danger mt-2 px-3 py-2 mx-auto d-block"
+                            style={{ width: 'auto', fontSize: '0.9rem' }}
+                            onClick={() => handleBuyNow(product._id)}
+                          >
+                            Buy - {product.price} MAD
+                          </button>
                           </div>
                         </div>
                       </div>

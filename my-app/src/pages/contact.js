@@ -120,9 +120,9 @@ export default function Contact() {
               <div className="mb-5">
                 <form onSubmit={handleSubmit} className="contact-form">
                   <div className="mb-4">
-                    <label htmlFor="inquiryType" className="form-label text-danger fw-bold">INQUIRY TYPE</label>
+                    <label htmlFor="inquiryType" className="form-label text-white fw-bold">INQUIRY TYPE</label>
                     <select 
-                      className="form-select bg-dark text-white border-danger" 
+                      className="form-select bg-dark text-white border-white" 
                       id="inquiryType" 
                       name="inquiryType"
                       value={formData.inquiryType}
@@ -138,10 +138,10 @@ export default function Contact() {
                   
                   <div className="row mb-4">
                     <div className="col-md-6 mb-4 mb-md-0">
-                      <label htmlFor="name" className="form-label text-danger fw-bold">NAME</label>
+                      <label htmlFor="name" className="form-label text-white fw-bold">NAME</label>
                       <input 
                         type="text" 
-                        className="form-control bg-dark text-white border-danger" 
+                        className="form-control bg-dark text-white border-white" 
                         id="name" 
                         name="name"
                         value={formData.name}
@@ -150,10 +150,10 @@ export default function Contact() {
                       />
                     </div>
                     <div className="col-md-6">
-                      <label htmlFor="email" className="form-label text-danger fw-bold">EMAIL</label>
+                      <label htmlFor="email" className="form-label text-white fw-bold">EMAIL</label>
                       <input 
                         type="email" 
-                        className="form-control bg-dark text-white border-danger" 
+                        className="form-control bg-dark text-white border-white" 
                         id="email" 
                         name="email"
                         value={formData.email}
@@ -164,10 +164,10 @@ export default function Contact() {
                   </div>
                   
                   <div className="mb-4">
-                    <label htmlFor="subject" className="form-label text-danger fw-bold">SUBJECT</label>
+                    <label htmlFor="subject" className="form-label text-white fw-bold">SUBJECT</label>
                     <input 
                       type="text" 
-                      className="form-control bg-dark text-white border-danger" 
+                      className="form-control bg-dark text-white border-white" 
                       id="subject" 
                       name="subject"
                       value={formData.subject}
@@ -177,9 +177,9 @@ export default function Contact() {
                   </div>
                   
                   <div className="mb-4">
-                    <label htmlFor="message" className="form-label text-danger fw-bold">MESSAGE</label>
+                    <label htmlFor="message" className="form-label text-white fw-bold">MESSAGE</label>
                     <textarea 
-                      className="form-control bg-dark text-white border-danger" 
+                      className="form-control bg-dark text-white border-white" 
                       id="message" 
                       name="message"
                       rows="6"
@@ -209,7 +209,7 @@ export default function Contact() {
                   )}
                   
                   {submitStatus === "error" && (
-                    <div className="alert alert-danger mt-4 text-center" role="alert">
+                    <div className="alert alert-white mt-4 text-center" role="alert">
                       Something went wrong. Please try again later or contact us directly via email.
                     </div>
                   )}

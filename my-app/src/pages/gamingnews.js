@@ -62,14 +62,14 @@ const GamingNews = () => {
       <div className="container text-center py-5">
         <div className="row">
           <div className="col p-5">
-            <h1>CHECK OUT LATEST GAMING NEWS</h1>
+            <h1>GLOBAL GAMING NEWS</h1>
             <div className="border-bottom border-3"></div>
           </div>
         </div>
       </div>
 
       {/* Fixed container for articles */}
-      <div className="container " style={{ maxWidth: '1200px', overflowX: 'hidden', border: '1px solid white', }}>
+      <div className="container " style={{ maxWidth: '1200px', overflowX: 'hidden' }}>
         <div className="row" style={{ maxHeight: '70vh', overflowY: 'auto', marginBottom: '50px', marginTop: '50px', padding: '0 15px' }}>
           {articles.map((article, index) => (
             <div key={index} className="col-md-4 mb-4">

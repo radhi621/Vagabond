@@ -8,6 +8,7 @@ import Contact from './pages/contact';
 import Games from './pages/games';
 import Dashboard from './pages/dashboard';
 import GamingNews from './pages/gamingnews';
+import Success from './pages/success';
 function App() {
   return (
     <Router>
@@ -20,6 +21,7 @@ function App() {
             <Route path="/hiring" element={<Hiring />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/gamingnews" element={<GamingNews />} />
+            <Route path="/success" element={<Success />} />
         </Routes>
     </Router>
 );

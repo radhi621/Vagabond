@@ -5,10 +5,12 @@ const cors = require("cors");
 const app = express();
 
 
+
+
 require('dotenv').config();
 const URL = process.env.URL;
 console.log("MongoDB URL:", process.env.URL); // Debugging line
-
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Middleware
 app.use(cors());
@@ -288,6 +290,42 @@ app.get("/api/contact", async (req, res) => {
   }
 });
 
+
+
+
+
+app.post("/api/create-checkout-session", async (req, res) => {
+  const { productId } = req.body;
+  try {
+    const product = await Merch.findById(productId);
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'mad',
+          product_data: {
+            name: product.title,
+            description: product.description,
+          },
+          unit_amount: Math.round(product.price * 100), // Stripe expects amount in cents
+        },
+        quantity: 1,
+      }],
+      mode: 'payment',
+      success_url: 'http://localhost:3000/success', // Change this to your success page
+      cancel_url: 'http://localhost:3000/',   // Change this to your cancel page
+    });
+
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error("Stripe checkout error:", err);
+    res.status(500).json({ error: "Failed to create checkout session" });
+  }
+});
 
 
 
