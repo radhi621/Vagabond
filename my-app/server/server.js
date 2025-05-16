@@ -10,7 +10,11 @@ const app = express();
 require('dotenv').config();
 const URL = process.env.URL;
 console.log("MongoDB URL:", process.env.URL); // Debugging line
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+const jwt = require('jsonwebtoken');
+const secretKey = process.env.JWT_SECRET
 
 // Middleware
 app.use(cors());
@@ -67,6 +71,47 @@ const Merch = mongoose.model("Merch", merchSchema);
 const Game = mongoose.model("Game", gameSchema);
 const News = mongoose.model("News", newsSchema);
 const Job = mongoose.model("Job", jobSchema);
+
+
+
+
+
+function verifyAdmin(req, res, next) {
+  const token = req.headers['authorization'];
+  if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== 'admin') {
+      return res.status(403).json({ error: 'Access denied. Admins only.' });
+    }
+    req.user = decoded;
+    next();
+  } catch (err) {
+    res.status(400).json({ error: 'Invalid token.' });
+  }
+}
+
+
+
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  // Simplified check - in production, use a database and hashed passwords
+  if (username === 'admin' && password === 'password') {
+    const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return res.json({ token });
+  }
+  res.status(401).json({ error: 'Invalid credentials' });
+});
+
+
+
+
+
+
+
+
+
 
 // Routes for Games
 app.get("/api/games", async (req, res) => {           // fetches data from server (read)
@@ -327,7 +372,9 @@ app.post("/api/create-checkout-session", async (req, res) => {
   }
 });
 
-
+app.get('/api/dashboard', verifyAdmin, (req, res) => {
+  res.json({ message: 'Welcome to the admin dashboard!' });
+});
 
 
 // Start server

@@ -49,9 +49,14 @@ export default function Navbar() {
                     </ul>
                     {/* Join Discord Button */}
                     <div className="text-center">
-                        <button className="btn bg-danger text-white px-4 py-2 d-inline-flex align-items-center border-0">
-                            <i className="fa-brands fa-discord me-2"></i> JOIN OUR DISCORD
-                        </button>
+                    <a 
+                    href="https://discord.gg/rYbMKFBh"  
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="btn bg-danger text-white px-4 py-2 d-inline-flex align-items-center border-0"
+                    >
+                    <i className="fa-brands fa-discord me-2"></i> JOIN OUR DISCORD
+                    </a>
                     </div>
                 </div>
             </div>

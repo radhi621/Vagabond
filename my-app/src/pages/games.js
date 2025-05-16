@@ -1,5 +1,7 @@
 
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 
@@ -49,6 +51,7 @@ export default function Games() {
                 <div className="row g-4">
                     {games.map((game, index) => (
                         <div className="col-md-6" key={index}>
+                            <Link to="/soon" style={{ textDecoration: "none"}}>
                             <div className="card bg-dark text-white h-100">
                                 <img
                                     src={game.image} // Use the `image` field from your database
@@ -61,6 +64,7 @@ export default function Games() {
                                     <p className="card-text text-light opacity-75">{game.description}</p>
                                 </div>
                             </div>
+                            </Link>
                         </div>
                     ))}
                 </div>

@@ -9,11 +9,14 @@ import Games from './pages/games';
 import Dashboard from './pages/dashboard';
 import GamingNews from './pages/gamingnews';
 import Success from './pages/success';
+import Soon from './pages/soon';
+import AdminLogin from './pages/Adminlogin';
 function App() {
   return (
     <Router>
         <Routes>
-        <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/" element={<Main />} />
             <Route path="/Games" element={<Games />} />
             <Route path="/news" element={<News />} />
@@ -22,6 +25,7 @@ function App() {
             <Route path="/contact" element={<Contact />} />
             <Route path="/gamingnews" element={<GamingNews />} />
             <Route path="/success" element={<Success />} />
+            <Route path="soon" element={<Soon />} />
         </Routes>
     </Router>
 );

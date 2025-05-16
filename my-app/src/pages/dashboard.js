@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
+import { getToken } from '../utils/auth';
+import { useNavigate } from 'react-router-dom';
+
 
 export default function Dashboard() {
   const [items, setItems] = useState([]);
@@ -14,12 +17,47 @@ export default function Dashboard() {
   const [salary, setSalary] = useState(""); // Job-specific field
   const [selectedPage, setSelectedPage] = useState("games");
 
+  const navigate = useNavigate();
+  const [authorized, setAuthorized] = useState(false);
+
   useEffect(() => {
     fetch(`http://localhost:5000/api/${selectedPage}`)
       .then((response) => response.json())
       .then((data) => setItems(data))
       .catch((error) => console.error(`Error fetching ${selectedPage}:`, error));
   }, [selectedPage]);
+
+
+
+
+
+useEffect(() => {
+  const token = getToken();
+  if (!token) {
+    alert("Access denied. Please log in as an admin.");
+    navigate('/');
+  } else {
+    fetch("http://localhost:5000/api/dashboard", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,  // Fixed: Added Bearer prefix
+      },
+    })
+      .then((res) => {
+        if (res.status === 401 || res.status === 403) throw new Error("Unauthorized");
+        return res.json();
+      })
+      .then(() => setAuthorized(true))
+      .catch(() => {
+        alert("Access denied. Admins only.");
+        navigate('/');
+      });
+  }
+}, [navigate]);
+if (!authorized) return null;
+
+
 
   const handleSubmit = (e) => {
     e.preventDefault();

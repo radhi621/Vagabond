@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 
@@ -66,9 +67,9 @@ export default function Hiring() {
                       <p className="text-danger mb-2">{job.location}</p>
                       <p className="text-secondary mb-0">{job.type}</p>
                     </div>
-                    <a href="#" className="btn btn-danger text-light px-4 fw-bold">
+                    <Link to="/soon" className="btn btn-danger text-light px-4 fw-bold">
                       LEARN MORE
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </div>
