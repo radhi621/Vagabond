@@ -7,6 +7,7 @@ const app = express();
 
 
 
+
 require('dotenv').config();
 const URL = process.env.URL;
 console.log("MongoDB URL:", process.env.URL); // Debugging line
@@ -93,16 +94,20 @@ function verifyAdmin(req, res, next) {
 }
 
 
-
+// admin login for dashboard
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
-  // Simplified check - in production, use a database and hashed passwords
-  if (username === 'admin' && password === 'password') {
+  if (
+    username === process.env.ADMIN_USERNAME &&
+    password === process.env.ADMIN_PASSWORD
+  ) {
     const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
     return res.json({ token });
   }
+
   res.status(401).json({ error: 'Invalid credentials' });
 });
+
 
 
 
