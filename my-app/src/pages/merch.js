@@ -64,7 +64,7 @@ export default function Merch() {
          <div className="container text-center py-5">
              <div className="row mb-5">
                 <div className="col p-5">
-                     <h1>CHECK OUT OUR GAMES</h1>
+                     <h1>CHECK OUT OUR MERCH</h1>
                      <br></br>
                     <div className="border-bottom border-3"></div>
                  </div>

@@ -7,6 +7,19 @@ export default function Hiring() {
   const [jobs, setJobs] = useState([]);
   const [imageHeight, setImageHeight] = useState(window.innerWidth <= 576 ? "70vh" : "50vh");
 
+  
+      const getJobRoute = (job, index) => {
+        if (job.title === "SENIOR UNREAL ENGINE DEVELOPER") {
+            return "/job1";
+        } else if (job.title === "LEVEL DESIGNER") {
+            return "/job2";
+        } else if (job.title === "Senior C++ Developer") {
+            return "/job3";
+        } else {
+            return "/soon"; // Default for any additional games
+        }
+    };
+
   useEffect(() => {
     const handleResize = () => {
       setImageHeight(window.innerWidth <= 576 ? "70vh" : "50vh");
@@ -57,7 +70,7 @@ export default function Hiring() {
 
       <div className="container-fluid bg-black py-2">
         <div className="row justify-content-center g-4">
-          {jobs.map((job) => (
+          {jobs.map((job, index) => (
             <div className="col-lg-7 mb-5" key={job._id}>
               <div className="card bg-transparent mb-4 border border-secondary">
                 <div className="card-body p-4">
@@ -67,7 +80,7 @@ export default function Hiring() {
                       <p className="text-danger mb-2">{job.location}</p>
                       <p className="text-secondary mb-0">{job.type}</p>
                     </div>
-                    <Link to="/soon" className="btn btn-danger text-light px-4 fw-bold">
+                    <Link  to={getJobRoute(job, index)} className="btn btn-danger text-light px-4 fw-bold">
                       LEARN MORE
                     </Link>
                   </div>

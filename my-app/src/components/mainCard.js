@@ -2,7 +2,7 @@ export default function MainCard() {
     return (
         <>
             <div className="card text-bg-dark border-0 rounded-0">
-                <img src="../images/Carouselitem.jpg" className="card-img  d-md-block" alt="Soldier at window" style={{objectFit: "cover",width: "100%",height: "70vh"}} />   
+                <img src="../images/parkour.png" className="card-img  d-md-block" alt="Soldier at window" style={{objectFit: "cover",width: "100%",height: "70vh"}} />   
                 <div className="card-img-overlay d-none d-md-block">
                     <div className="container h-100">
                         <div className="row h-100 justify-content-end">
@@ -22,7 +22,7 @@ export default function MainCard() {
             </div>
 
             <div className="card text-bg-dark border-0 rounded-0">
-                <img src="../images/Carouselitem.jpg" className="card-img  d-md-block" alt="Soldiers at sunset" style={{objectFit: "cover",width: "100%",height: "70vh"}} />
+                <img src="../images/Horror_Game.png" className="card-img  d-md-block" alt="Soldiers at sunset" style={{objectFit: "cover",width: "100%",height: "70vh"}} />
                 <div className="card-img-overlay d-none d-md-block">
                     <div className="container h-100">
                         <div className="row h-100">

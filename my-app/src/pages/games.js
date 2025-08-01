@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
@@ -8,6 +7,21 @@ import Footer from "../components/footer";
 export default function Games() {
     const [games, setGames] = useState([]);
     const [imageHeight, setImageHeight] = useState(window.innerWidth <= 576 ? "70vh" : "50vh");
+
+    // Function to determine the route for each game
+    const getGameRoute = (game, index) => {
+        if (game.title === "BUILT IN UNREAL ENGINE 5") {
+            return "/game1overview";
+        } else if (game.title === "NEW WEAPONS AND EQUIPMENT") {
+            return "/game2overview";
+        } else if (game.title === "Your Game Title") {
+            return "/game3overview";
+        } else if (game.title === "Your Game Title") {
+            return "/game4overview";
+        } else {
+            return "/soon"; // Default for any additional games
+        }
+    };
 
     // Fetch games from the backend
     useEffect(() => {
@@ -51,7 +65,7 @@ export default function Games() {
                 <div className="row g-4">
                     {games.map((game, index) => (
                         <div className="col-md-6" key={index}>
-                            <Link to="/soon" style={{ textDecoration: "none"}}>
+                            <Link to={getGameRoute(game, index)} style={{ textDecoration: "none"}}>
                             <div className="card bg-dark text-white h-100">
                                 <img
                                     src={game.image} // Use the `image` field from your database
