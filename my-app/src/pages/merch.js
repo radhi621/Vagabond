@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
+import { useCart } from "../context/CartContext";
 
 export default function Merch() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [imageHeight, setImageHeight] = useState(window.innerWidth <= 576 ? "70vh" : "50vh");
+  
+  const { addToCart, getItemQuantity } = useCart();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/merch")
@@ -22,6 +26,13 @@ export default function Merch() {
   const filteredProducts = selectedCategory === "All"
     ? products
     : products.filter((product) => product.category === selectedCategory);
+
+  // Function to truncate description
+  const truncateText = (text, maxLength = 120) => {
+    if (!text) return "No description available";
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
+  };
 
     const handleBuyNow = async (productId) => {
       try {
@@ -102,29 +113,61 @@ export default function Merch() {
                 {filteredProducts.length > 0 ? (
                   filteredProducts.map((product) => (
                     <div className="col-md-4 mb-4" key={product._id}>
-                      <div className="card bg-dark text-white h-100 border-secondary hover-shadow transition">
-                        <div className="position-relative">
-                          <img
-                            src={product.image}
-                            className="card-img-top"
-                            style={{ height: "300px", objectFit: "cover" }}
-                            alt={product.title}
-                          />
-                          <div className="position-absolute top-0 end-0 m-2">
-                            <span className="badge bg-danger">{product.category}</span>
+                      <div className="card bg-dark text-white h-100 border-secondary hover-shadow transition" style={{ minHeight: "600px" }}>
+                        <Link to={`/product/${product._id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                          <div className="position-relative">
+                            <img
+                              src={product.image}
+                              className="card-img-top"
+                              style={{ height: "250px", objectFit: "cover" }}
+                              alt={product.title}
+                            />
+                            <div className="position-absolute top-0 end-0 m-2">
+                              <span className="badge bg-danger">{product.category}</span>
+                            </div>
                           </div>
-                        </div>
-                        <div className="card-body d-flex flex-column">
-                          <h5 className="card-title fw-bold">{product.title}</h5>
-                          <p className="card-text flex-grow-1">{product.description}</p>
-                          <div className="d-flex justify-content-between align-items-center mt-3">
-                          <button
-                            className="btn btn-danger mt-2 px-3 py-2 mx-auto d-block"
-                            style={{ width: 'auto', fontSize: '0.9rem' }}
-                            onClick={() => handleBuyNow(product._id)}
-                          >
-                            Buy - {product.price} MAD
-                          </button>
+                          <div className="card-body d-flex flex-column" style={{ height: "200px" }}>
+                            <h5 className="card-title fw-bold mb-3" style={{ fontSize: "1.1rem", lineHeight: "1.3" }}>{product.title}</h5>
+                            <p className="card-text text-light mb-3" style={{ 
+                              fontSize: "0.9rem", 
+                              lineHeight: "1.4",
+                              flex: "1",
+                              minHeight: "60px"
+                            }}>
+                              {truncateText(product.description)}
+                            </p>
+                            <div className="mt-auto">
+                              <div className="d-flex justify-content-between align-items-center">
+                                <span className="h6 mb-0 text-white fw-bold">{product.price} USD</span>
+                                {getItemQuantity(product._id) > 0 && (
+                                  <span className="badge bg-success">
+                                    {getItemQuantity(product._id)} in cart
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </Link>
+                        <div className="card-footer bg-dark border-top-0 p-3">
+                          <div className="d-grid gap-2">
+                            <button
+                              className="btn btn-outline-danger"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                addToCart(product);
+                              }}
+                            >
+                              Add to Cart
+                            </button>
+                            <button
+                              className="btn btn-danger"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                handleBuyNow(product._id);
+                              }}
+                            >
+                              Buy Now
+                            </button>
                           </div>
                         </div>
                       </div>

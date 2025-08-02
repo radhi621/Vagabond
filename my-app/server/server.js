@@ -215,6 +215,21 @@ app.get("/api/merch", async (req, res) => {
   }
 });
 
+// Fetch a single merch item by ID
+app.get("/api/merch/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const merch = await Merch.findById(id);
+    if (!merch) {
+      return res.status(404).json({ error: "Merch item not found" });
+    }
+    res.json(merch);
+  } catch (err) {
+    console.error("Error fetching merch item:", err);
+    res.status(500).json({ error: "Failed to fetch merch item" });
+  }
+});
+
 // Add a new merch item
 app.post("/api/merch", async (req, res) => {
   const { title, description, image, category, price } = req.body;
@@ -356,7 +371,7 @@ app.post("/api/create-checkout-session", async (req, res) => {
       payment_method_types: ['card'],
       line_items: [{
         price_data: {
-          currency: 'mad',
+          currency: 'usd', // Changed to USD for consistency
           product_data: {
             name: product.title,
             description: product.description,
@@ -374,6 +389,60 @@ app.post("/api/create-checkout-session", async (req, res) => {
   } catch (err) {
     console.error("Stripe checkout error:", err);
     res.status(500).json({ error: "Failed to create checkout session" });
+  }
+});
+
+// Cart checkout session
+app.post("/api/create-cart-checkout-session", async (req, res) => {
+  const { cartItems } = req.body;
+  try {
+    console.log('Received cart items:', cartItems); // Debug log
+    
+    if (!cartItems || cartItems.length === 0) {
+      return res.status(400).json({ error: "Cart is empty" });
+    }
+
+    // Validate cart items
+    for (const item of cartItems) {
+      if (!item.title || !item.price || !item.quantity) {
+        console.error('Invalid cart item:', item);
+        return res.status(400).json({ error: `Invalid cart item: missing required fields` });
+      }
+      if (typeof item.price !== 'number' || item.price <= 0) {
+        return res.status(400).json({ error: `Invalid price for item: ${item.title}` });
+      }
+      if (typeof item.quantity !== 'number' || item.quantity <= 0) {
+        return res.status(400).json({ error: `Invalid quantity for item: ${item.title}` });
+      }
+    }
+
+    const lineItems = cartItems.map(item => ({
+      price_data: {
+        currency: 'usd', // Changed to USD as MAD might not be supported
+        product_data: {
+          name: item.title,
+          description: item.description || '',
+        },
+        unit_amount: Math.round(item.price * 100), // Stripe expects amount in cents
+      },
+      quantity: item.quantity,
+    }));
+
+    console.log('Creating Stripe session with line items:', lineItems); // Debug log
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: lineItems,
+      mode: 'payment',
+      success_url: 'http://localhost:3000/success',
+      cancel_url: 'http://localhost:3000/merch',
+    });
+
+    console.log('Stripe session created successfully:', session.id); // Debug log
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error("Stripe cart checkout error:", err);
+    res.status(500).json({ error: `Failed to create cart checkout session: ${err.message}` });
   }
 });
 

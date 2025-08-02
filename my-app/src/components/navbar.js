@@ -1,5 +1,13 @@
+import React, { useState } from 'react';
+import { useCart } from '../context/CartContext';
+import Cart from './Cart';
+
 export default function Navbar() {
+    const [isCartOpen, setIsCartOpen] = useState(false);
+    const { getTotalItems } = useCart();
+
     return (
+        <>
         <nav className="navbar navbar-expand-lg bg-black navbar-dark border-bottom sticky-top">
             <div className="container-fluid">
                 {/* Logo */}
@@ -19,7 +27,7 @@ export default function Navbar() {
                     <span className="navbar-toggler-icon"></span>
                 </button>
                 {/* Navbar Content */}
-                <div className="collapse navbar-collapse text-center " id="navbarNav">
+                <div className="collapse navbar-collapse text-center" id="navbarNav">
                     {/* Centered Links */}
                     <ul className="navbar-nav mx-auto">
                         <li className="nav-item">
@@ -47,19 +55,38 @@ export default function Navbar() {
                             <a className="nav-link mx-3" href="/Contact">CONTACT</a>
                         </li>
                     </ul>
-                    {/* Join Discord Button */}
-                    <div className="text-center">
-                    <a 
-                    href="https://discord.gg/rYbMKFBh"  
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="btn bg-danger text-white px-4 py-2 d-inline-flex align-items-center border-0"
-                    >
-                    <i className="fa-brands fa-discord me-2"></i> JOIN OUR DISCORD
-                    </a>
+                    
+                    {/* Cart and Discord Buttons */}
+                    <div className="d-flex flex-column flex-lg-row align-items-center justify-content-center mt-3 mt-lg-0">
+                        {/* Cart Button */}
+                        <button 
+                            className="btn btn-outline-light mb-2 mb-lg-0 me-lg-3 position-relative"
+                            onClick={() => setIsCartOpen(true)}
+                        >
+                            🛒
+                            {getTotalItems() > 0 && (
+                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {getTotalItems()}
+                                </span>
+                            )}
+                        </button>
+                        
+                        {/* Join Discord Button */}
+                        <a 
+                        href="https://discord.gg/rYbMKFBh"  
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="btn bg-danger text-white px-4 py-2 d-inline-flex align-items-center border-0"
+                        >
+                        <i className="fa-brands fa-discord me-2"></i> JOIN OUR DISCORD
+                        </a>
                     </div>
                 </div>
             </div>
         </nav>
+        
+        {/* Cart Component */}
+        <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+        </>
     );
 }
