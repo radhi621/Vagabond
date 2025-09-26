@@ -6,18 +6,11 @@ import Footer from "../components/footer";
 export default function Hiring() {
   const [jobs, setJobs] = useState([]);
   const [imageHeight, setImageHeight] = useState(window.innerWidth <= 576 ? "70vh" : "50vh");
+  const [savedJobs, setSavedJobs] = useState([]);
 
   
-      const getJobRoute = (job, index) => {
-        if (job.title === "SENIOR UNREAL ENGINE DEVELOPER") {
-            return "/job1";
-        } else if (job.title === "LEVEL DESIGNER") {
-            return "/job2";
-        } else if (job.title === "Senior C++ Developer") {
-            return "/job3";
-        } else {
-            return "/soon"; // Default for any additional games
-        }
+      const getJobRoute = (job) => {
+        return `/jobs/${job._id}`; // Dynamic route using job ID
     };
 
   useEffect(() => {
@@ -35,6 +28,10 @@ export default function Hiring() {
       .then((response) => response.json())
       .then((data) => setJobs(data))
       .catch((error) => console.error("Error fetching jobs:", error));
+    
+    // Load saved jobs from wishlist
+    const jobWishlist = JSON.parse(localStorage.getItem('jobWishlist') || '[]');
+    setSavedJobs(jobWishlist.map(job => job._id));
   }, []);
 
   return (
@@ -72,17 +69,73 @@ export default function Hiring() {
         <div className="row justify-content-center g-4">
           {jobs.map((job, index) => (
             <div className="col-lg-7 mb-5" key={job._id}>
-              <div className="card bg-transparent mb-4 border border-secondary">
+              <div className="card bg-transparent mb-4 border border-secondary" 
+                   style={{cursor: 'pointer', transition: 'all 0.3s ease'}}
+                   onMouseEnter={(e) => {
+                     e.currentTarget.style.transform = 'translateY(-5px)';
+                     e.currentTarget.style.borderColor = '#dc3545';
+                   }}
+                   onMouseLeave={(e) => {
+                     e.currentTarget.style.transform = 'translateY(0)';
+                     e.currentTarget.style.borderColor = '#6c757d';
+                   }}>
                 <div className="card-body p-4">
                   <div className="d-flex justify-content-between align-items-start">
-                    <div>
+                    <div className="flex-grow-1">
                       <h2 className="text-white fw-bold mb-2">{job.title}</h2>
                       <p className="text-danger mb-2">{job.location}</p>
                       <p className="text-secondary mb-0">{job.type}</p>
                     </div>
-                    <Link  to={getJobRoute(job, index)} className="btn btn-danger text-light px-4 fw-bold">
-                      LEARN MORE
-                    </Link>
+                    <div className="d-flex gap-2">
+                      <button 
+                        className={`btn ${savedJobs.includes(job._id) ? 'btn-danger' : 'btn-outline-light'} px-3`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          try {
+                            // Load current job wishlist
+                            const jobWishlist = JSON.parse(localStorage.getItem('jobWishlist') || '[]');
+                            
+                            // Check if job is already in wishlist
+                            const isAlreadySaved = jobWishlist.find(j => j._id === job._id);
+                            
+                            if (!isAlreadySaved) {
+                              // Add job to wishlist
+                              jobWishlist.push(job);
+                              localStorage.setItem('jobWishlist', JSON.stringify(jobWishlist));
+                              setSavedJobs(prev => [...prev, job._id]);
+                              
+                              // Trigger custom event for navbar update
+                              window.dispatchEvent(new Event('wishlistChanged'));
+                              
+                              // Visual feedback
+                              e.target.style.color = '#dc3545';
+                              e.target.innerHTML = '<i class="bi bi-heart-fill me-1"></i>Saved!';
+                              setTimeout(() => {
+                                e.target.className = 'btn btn-danger px-3';
+                                e.target.innerHTML = '<i class="bi bi-heart-fill me-1"></i>Saved';
+                              }, 1000);
+                            } else {
+                              // Visual feedback that it's already saved
+                              e.target.style.color = '#ffc107';
+                              e.target.innerHTML = '<i class="bi bi-heart-fill me-1"></i>Already Saved';
+                              setTimeout(() => {
+                                e.target.style.color = '';
+                                e.target.innerHTML = '<i class="bi bi-heart-fill me-1"></i>Saved';
+                              }, 1500);
+                            }
+                          } catch (error) {
+                            console.error('Error saving job to wishlist:', error);
+                          }
+                        }}
+                        title={savedJobs.includes(job._id) ? "Already saved to wishlist" : "Save to wishlist"}
+                      >
+                        <i className={`bi ${savedJobs.includes(job._id) ? 'bi-heart-fill' : 'bi-heart'} me-1`}></i>
+                        {savedJobs.includes(job._id) ? 'Saved' : 'Save'}
+                      </button>
+                      <Link to={getJobRoute(job)} className="btn btn-danger text-light px-4 fw-bold">
+                        LEARN MORE
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>

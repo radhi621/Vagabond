@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 
@@ -58,19 +59,28 @@ export default function News() {
                 <div className="row justify-content-center g-4 mb-5"> 
                     {news.map((article) => (
                         <div className="col-lg-8 d-flex justify-content-center" key={article._id}> {/* Center content */}
-                            <div className="card bg-dark border-0 overflow-hidden w-100"> {/* Full width in column */}
-                                <div className="row g-0">
-                                    <div className="col-md-6">
-                                        <img src={article.image} className="img-fluid w-100" style={{ height: "300px", objectFit: "cover" }} alt={article.title} />
-                                    </div>
-                                    <div className="col-md-6 d-flex align-items-center bg-dark">
-                                        <div className="card-body p-4">
-                                            <h2 className="text-white fw-bold mb-2">{article.title}</h2>
-                                            <p className="text-secondary mb-0">{article.description}</p>
+                            <Link to={`/news/${article._id}`} style={{ textDecoration: "none", width: "100%" }}>
+                                <div className="card bg-dark border-0 overflow-hidden w-100 h-100" style={{cursor: 'pointer', transition: 'transform 0.2s'}}
+                                     onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                                     onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                                    <div className="row g-0 h-100">
+                                        <div className="col-md-6">
+                                            <img src={article.image} className="img-fluid w-100" style={{ height: "300px", objectFit: "cover" }} alt={article.title} />
+                                        </div>
+                                        <div className="col-md-6 d-flex align-items-center bg-dark">
+                                            <div className="card-body p-4">
+                                                <h2 className="text-white fw-bold mb-2">{article.title}</h2>
+                                                <p className="text-secondary mb-3">
+                                                    {article.description && article.description.length > 150 
+                                                        ? `${article.description.substring(0, 150)}...` 
+                                                        : article.description}
+                                                </p>
+                                                <span className="btn btn-danger btn-sm">Read More →</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         </div>
                     ))}
                 </div>

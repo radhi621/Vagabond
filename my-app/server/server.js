@@ -33,14 +33,44 @@ mongoose
 // Define Schemas and Models
 const gameSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  description: { type: String, required: true },
+  shortDescription: { type: String, required: true }, // Short description for header
+  description: { type: String, required: true }, // Full description for About section
   image: { type: String, required: true },
+  genre: { type: String },
+  platform: { type: String },
+  releaseDate: { type: String },
+  developer: { type: String },
+  languages: { type: String },
+  rating: { type: String },
+  // Game Features (stored as array)
+  features: [{ type: String }],
+  // System Requirements
+  systemRequirements: {
+    os: { type: String, default: 'Windows 10/11' },
+    memory: { type: String, default: '8 GB RAM' },
+    graphics: { type: String, default: 'GTX 1060+' },
+    storage: { type: String, default: '50 GB' }
+  },
+  playLink: { type: String, required: false }, // Download/Play link
+  wishlistLink: { type: String, required: false }, // Wishlist link
+  trailerLink: { type: String, required: false }, // Trailer/Video link
+  createdAt: { type: Date, default: Date.now }
 });
 
 const newsSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String, required: true },
   image: { type: String, required: true },
+  author: { type: String, default: 'Vagabond Studios Team' },
+  category: { type: String, default: 'General' },
+  featured: { type: Boolean, default: false },
+  externalLink: { type: String, required: false }, // External news source link
+  socialLinks: {
+    twitter: { type: String, required: false },
+    facebook: { type: String, required: false },
+    linkedin: { type: String, required: false }
+  },
+  createdAt: { type: Date, default: Date.now }
 });
 
 const merchSchema = new mongoose.Schema({
@@ -48,7 +78,14 @@ const merchSchema = new mongoose.Schema({
   description: { type: String, required: true },
   image: { type: String, required: true },
   category: { type: String, required: true }, // Add category support
-  price: { type: Number, required: true } // Add price field
+  price: { type: Number, required: true }, // Add price field
+  purchaseLink: { type: String, required: false }, // External purchase link
+  socialLinks: {
+    twitter: { type: String, required: false },
+    facebook: { type: String, required: false },
+    instagram: { type: String, required: false }
+  },
+  createdAt: { type: Date, default: Date.now }
 });
 
 const jobSchema = new mongoose.Schema({
@@ -56,6 +93,15 @@ const jobSchema = new mongoose.Schema({
   location: { type: String, required: true },
   type: { type: String, required: true }, // Full-Time, Part-Time, etc.
   description: { type: String, required: false },
+  image: { type: String, required: false }, // Job image for header background
+  requirements: { type: [String], required: false },
+  benefits: { type: [String], required: false },
+  salary: { type: String, required: false },
+  department: { type: String, default: 'Game Development' },
+  applyLink: { type: String, required: false }, // Application link
+  companyWebsite: { type: String, required: false }, // Company website
+  contactEmail: { type: String, required: false }, // Contact email
+  createdAt: { type: Date, default: Date.now }
 });
 
 const contactSchema = new mongoose.Schema({
@@ -129,13 +175,66 @@ app.get("/api/games", async (req, res) => {           // fetches data from serve
   }
 });
 
-app.post("/api/games", async (req, res) => { // sends data to server (create)
-  const { title, description, image } = req.body;
-  if (!title || !description || !image) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
+// Get single game by ID
+app.get("/api/games/:id", async (req, res) => {
   try {
-    const newGame = new Game({ title, description, image });
+    const { id } = req.params;
+    const game = await Game.findById(id);
+    if (!game) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+    res.json(game);
+  } catch (err) {
+    console.error("Error fetching game:", err);
+    res.status(500).json({ error: "Failed to fetch game" });
+  }
+});
+
+app.post("/api/games", async (req, res) => { // sends data to server (create)
+  const { 
+    title, 
+    shortDescription,
+    description, 
+    image, 
+    genre,
+    platform,
+    releaseDate,
+    developer,
+    languages,
+    rating,
+    features,
+    systemRequirements,
+    playLink, 
+    wishlistLink, 
+    trailerLink 
+  } = req.body;
+  
+  if (!title || !shortDescription || !description || !image) {
+    return res.status(400).json({ error: "Title, short description, description, and image are required" });
+  }
+  
+  try {
+    const gameData = { 
+      title, 
+      shortDescription,
+      description, 
+      image,
+      features: features || [],
+      systemRequirements: systemRequirements || {}
+    };
+
+    // Only add fields that have values
+    if (genre) gameData.genre = genre;
+    if (platform) gameData.platform = platform;
+    if (releaseDate) gameData.releaseDate = releaseDate;
+    if (developer) gameData.developer = developer;
+    if (languages) gameData.languages = languages;
+    if (rating) gameData.rating = rating;
+    if (playLink) gameData.playLink = playLink;
+    if (wishlistLink) gameData.wishlistLink = wishlistLink;
+    if (trailerLink) gameData.trailerLink = trailerLink;
+
+    const newGame = new Game(gameData);
     await newGame.save();
     res.json(newGame);
   } catch (err) {
@@ -169,13 +268,34 @@ app.get("/api/news", async (req, res) => {
   }
 });
 
+// Get single news article by ID
+app.get("/api/news/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const news = await News.findById(id);
+    if (!news) {
+      return res.status(404).json({ error: "News article not found" });
+    }
+    res.json(news);
+  } catch (err) {
+    console.error("Error fetching news article:", err);
+    res.status(500).json({ error: "Failed to fetch news article" });
+  }
+});
+
 app.post("/api/news", async (req, res) => {
-  const { title, description, image } = req.body;
+  const { title, description, image, externalLink, socialLinks } = req.body;
   if (!title || !description || !image) {
     return res.status(400).json({ error: "All fields are required" });
   }
   try {
-    const newNews = new News({ title, description, image });
+    const newNews = new News({ 
+      title, 
+      description, 
+      image, 
+      externalLink,
+      socialLinks: socialLinks || {}
+    });
     await newNews.save();
     res.json(newNews);
   } catch (err) {
@@ -232,12 +352,20 @@ app.get("/api/merch/:id", async (req, res) => {
 
 // Add a new merch item
 app.post("/api/merch", async (req, res) => {
-  const { title, description, image, category, price } = req.body;
+  const { title, description, image, category, price, purchaseLink, socialLinks } = req.body;
   if (!title || !description || !image || !category || !price) {
     return res.status(400).json({ error: "All fields are required" });
   }
   try {
-    const newMerch = new Merch({ title, description, image, category, price });
+    const newMerch = new Merch({ 
+      title, 
+      description, 
+      image, 
+      category, 
+      price, 
+      purchaseLink,
+      socialLinks: socialLinks || {}
+    });
     await newMerch.save();
     res.json(newMerch);
   } catch (err) {
@@ -269,13 +397,29 @@ app.delete("/api/merch/:id", async (req, res) => {
 
 // POST /api/jobs - Create a new job
 app.post("/api/jobs", async (req, res) => {
-  const { title, location, type } = req.body;
+  const { title, location, type, description, image, applyLink, companyWebsite, contactEmail, salary, department } = req.body;
   if (!title || !location || !type) {
     return res.status(400).json({ error: "All fields (title, location, type) are required" });
   }
 
   try {
-    const newJob = new Job({ title, location, type });
+    // Create job data object with conditional fields
+    const jobData = { 
+      title, 
+      location, 
+      type 
+    };
+    
+    // Add optional fields only if they are provided
+    if (description) jobData.description = description;
+    if (image) jobData.image = image;
+    if (applyLink) jobData.applyLink = applyLink;
+    if (companyWebsite) jobData.companyWebsite = companyWebsite;
+    if (contactEmail) jobData.contactEmail = contactEmail;
+    if (salary) jobData.salary = salary;
+    if (department) jobData.department = department;
+
+    const newJob = new Job(jobData);
     await newJob.save();
     res.status(201).json(newJob);  // Respond with the created job and status 201
   } catch (err) {
@@ -292,6 +436,54 @@ app.get("/api/jobs", async (req, res) => {
   } catch (err) {
     console.error("Error fetching jobs:", err);
     res.status(500).json({ error: "Failed to fetch jobs" });
+  }
+});
+
+// PUT /api/jobs/:id - Update a job
+app.put("/api/jobs/:id", async (req, res) => {
+  const { id } = req.params;
+  const { title, location, type, description, image, applyLink, companyWebsite, contactEmail, salary, department } = req.body;
+
+  try {
+    // Create update data object with conditional fields
+    const updateData = { 
+      title, 
+      location, 
+      type 
+    };
+    
+    // Add optional fields only if they are provided
+    if (description) updateData.description = description;
+    if (image) updateData.image = image;
+    if (applyLink) updateData.applyLink = applyLink;
+    if (companyWebsite) updateData.companyWebsite = companyWebsite;
+    if (contactEmail) updateData.contactEmail = contactEmail;
+    if (salary) updateData.salary = salary;
+    if (department) updateData.department = department;
+
+    const updatedJob = await Job.findByIdAndUpdate(id, updateData, { new: true });
+    if (!updatedJob) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    res.json(updatedJob);
+  } catch (err) {
+    console.error("Error updating job:", err);
+    res.status(500).json({ error: "Failed to update job" });
+  }
+});
+
+// GET /api/jobs/:id - Fetch single job by ID
+app.get("/api/jobs/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const job = await Job.findById(id);
+    if (!job) {
+      return res.status(404).json({ error: "Job not found" });
+    }
+    res.json(job);
+  } catch (err) {
+    console.error("Error fetching job:", err);
+    res.status(500).json({ error: "Failed to fetch job" });
   }
 });
 
@@ -450,6 +642,18 @@ app.get('/api/dashboard', verifyAdmin, (req, res) => {
   res.json({ message: 'Welcome to the admin dashboard!' });
 });
 
+// Additional route for wishlist functionality (without /api prefix)
+app.get('/merch/:id', async (req, res) => {
+  try {
+    const merch = await Merch.findById(req.params.id);
+    if (!merch) {
+      return res.status(404).json({ message: 'Merchandise not found' });
+    }
+    res.json(merch);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 // Start server
 const PORT = 5000;

@@ -3,11 +3,12 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import { getToken } from '../utils/auth';
 import { useNavigate } from 'react-router-dom';
-
+import '../styles/dashboard.css';
 
 export default function Dashboard() {
   const [items, setItems] = useState([]);
   const [title, setTitle] = useState("");
+  const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState("");
   const [category, setCategory] = useState(""); // For merch
@@ -16,6 +17,42 @@ export default function Dashboard() {
   const [location, setLocation] = useState(""); // Job-specific field
   const [salary, setSalary] = useState(""); // Job-specific field
   const [selectedPage, setSelectedPage] = useState("games");
+  const [stats, setStats] = useState({ games: 0, news: 0, merch: 0, jobs: 0 });
+
+  // Link fields for games
+  const [playLink, setPlayLink] = useState("");
+  const [wishlistLink, setWishlistLink] = useState("");
+  const [trailerLink, setTrailerLink] = useState("");
+
+  // Game-specific information fields
+  const [genre, setGenre] = useState("");
+  const [platform, setPlatform] = useState("");
+  const [releaseDate, setReleaseDate] = useState("");
+  const [developer, setDeveloper] = useState("");
+  const [languages, setLanguages] = useState("");
+  const [rating, setRating] = useState("");
+  const [features, setFeatures] = useState("");
+  const [systemReqOS, setSystemReqOS] = useState("");
+  const [systemReqMemory, setSystemReqMemory] = useState("");
+  const [systemReqGraphics, setSystemReqGraphics] = useState("");
+  const [systemReqStorage, setSystemReqStorage] = useState("");
+
+  // Link fields for news
+  const [externalLink, setExternalLink] = useState("");
+  const [twitterLink, setTwitterLink] = useState("");
+  const [facebookLink, setFacebookLink] = useState("");
+  const [linkedinLink, setLinkedinLink] = useState("");
+
+  // Link fields for jobs
+  const [applyLink, setApplyLink] = useState("");
+  const [companyWebsite, setCompanyWebsite] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+
+  // Link fields for merch
+  const [purchaseLink, setPurchaseLink] = useState("");
+  const [merchTwitterLink, setMerchTwitterLink] = useState("");
+  const [merchFacebookLink, setMerchFacebookLink] = useState("");
+  const [merchInstagramLink, setMerchInstagramLink] = useState("");
 
   const navigate = useNavigate();
   const [authorized, setAuthorized] = useState(false);
@@ -26,6 +63,28 @@ export default function Dashboard() {
       .then((data) => setItems(data))
       .catch((error) => console.error(`Error fetching ${selectedPage}:`, error));
   }, [selectedPage]);
+
+  // Fetch stats for all categories
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const categories = ['games', 'news', 'merch', 'jobs'];
+        const statsData = {};
+        
+        for (const category of categories) {
+          const response = await fetch(`http://localhost:5000/api/${category}`);
+          const data = await response.json();
+          statsData[category] = data.length;
+        }
+        
+        setStats(statsData);
+      } catch (error) {
+        console.error('Error fetching stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, [items]); // Refetch stats when items change
 
 
 
@@ -62,15 +121,70 @@ if (!authorized) return null;
   const handleSubmit = (e) => {
     e.preventDefault();
     let newItem = {};
-    // If the selected page is "jobs", send only title, location, and type
+    
     if (selectedPage === "jobs") {
-      newItem = { title, location, type: position }; // Only required job fields
+      newItem = { 
+        title, 
+        location, 
+        type: position, 
+        description,
+        image,
+        applyLink, 
+        companyWebsite, 
+        contactEmail 
+      };
     } else if (selectedPage === "merch") {
-      // For merch, send title, description, image, category, and price
-      newItem = { title, description, image, category, price };
-    } else {
-      // For other pages (like "games"), send title, description, and image
-      newItem = { title, description, image };
+      newItem = { 
+        title, 
+        description, 
+        image, 
+        category, 
+        price, 
+        purchaseLink,
+        socialLinks: {
+          twitter: merchTwitterLink,
+          facebook: merchFacebookLink,
+          instagram: merchInstagramLink
+        }
+      };
+    } else if (selectedPage === "games") {
+      newItem = { 
+        title, 
+        shortDescription,
+        description, 
+        image,
+        features: features ? features.split(',').map(f => f.trim()).filter(f => f) : [],
+        systemRequirements: {}
+      };
+
+      // Only add fields that have values
+      if (genre) newItem.genre = genre;
+      if (platform) newItem.platform = platform;
+      if (releaseDate) newItem.releaseDate = releaseDate;
+      if (developer) newItem.developer = developer;
+      if (languages) newItem.languages = languages;
+      if (rating) newItem.rating = rating;
+      if (playLink) newItem.playLink = playLink;
+      if (wishlistLink) newItem.wishlistLink = wishlistLink;
+      if (trailerLink) newItem.trailerLink = trailerLink;
+      
+      // Only add system requirements that have values
+      if (systemReqOS) newItem.systemRequirements.os = systemReqOS;
+      if (systemReqMemory) newItem.systemRequirements.memory = systemReqMemory;
+      if (systemReqGraphics) newItem.systemRequirements.graphics = systemReqGraphics;
+      if (systemReqStorage) newItem.systemRequirements.storage = systemReqStorage;
+    } else if (selectedPage === "news") {
+      newItem = { 
+        title, 
+        description, 
+        image, 
+        externalLink,
+        socialLinks: {
+          twitter: twitterLink,
+          facebook: facebookLink,
+          linkedin: linkedinLink
+        }
+      };
     }
 
 
@@ -87,7 +201,9 @@ if (!authorized) return null;
       })
       .then((data) => {
         setItems([...items, data]);
+        // Clear all form fields
         setTitle("");
+        setShortDescription("");
         setDescription("");
         setImage("");
         setCategory("");
@@ -95,6 +211,32 @@ if (!authorized) return null;
         setPosition("");
         setLocation("");
         setSalary("");
+        setPlayLink("");
+        setWishlistLink("");
+        setTrailerLink("");
+        // Clear game-specific fields
+        setGenre("");
+        setPlatform("");
+        setReleaseDate("");
+        setDeveloper("");
+        setLanguages("");
+        setRating("");
+        setFeatures("");
+        setSystemReqOS("");
+        setSystemReqMemory("");
+        setSystemReqGraphics("");
+        setSystemReqStorage("");
+        setExternalLink("");
+        setTwitterLink("");
+        setFacebookLink("");
+        setLinkedinLink("");
+        setApplyLink("");
+        setCompanyWebsite("");
+        setContactEmail("");
+        setPurchaseLink("");
+        setMerchTwitterLink("");
+        setMerchFacebookLink("");
+        setMerchInstagramLink("");
       })
       .catch((error) => console.error("Error adding item:", error));
   };
@@ -117,133 +259,520 @@ if (!authorized) return null;
   return (
     <>
       <Navbar />
-      <div className="bg-black text-white p-5">
-        <h1>Add New Item</h1>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label className="form-label">Title</label>
-            <input
-              type="text"
-              className="form-control"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
+      <div className="dashboard-container">
+        {/* Dashboard Header */}
+        <div className="dashboard-header">
+          <div className="container">
+            <h1 className="display-4 fw-bold text-white mb-0">Admin Dashboard</h1>
+            <p className="text-light opacity-75 mb-0">Manage your game studio content</p>
           </div>
-          <div className="mb-3">
-            <label className="form-label">Description</label>
-            <textarea
-              className="form-control"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              
-            ></textarea>
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Image URL</label>
-            <input
-              type="text"
-              className="form-control"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              
-            />
-          </div>
-          <div className="mb-3">
-            <label className="form-label">Select Page</label>
-            <select
-              className="form-control"
-              value={selectedPage}
-              onChange={(e) => setSelectedPage(e.target.value)}
-            >
-              <option value="games">Games</option>
-              <option value="news">News</option>
-              <option value="merch">Merch</option>
-              <option value="jobs">Jobs</option>
-            </select>
+        </div>
+
+        <div className="container py-4">
+          {/* Stats Section */}
+          <div className="stats-container">
+            <div className="stat-card">
+              <span className="stat-number">{stats.games}</span>
+              <span className="stat-label">Games</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-number">{stats.news}</span>
+              <span className="stat-label">News Articles</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-number">{stats.merch}</span>
+              <span className="stat-label">Merch Items</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-number">{stats.jobs}</span>
+              <span className="stat-label">Job Openings</span>
+            </div>
           </div>
 
-          {/* Show category and price fields only when adding merch */}
-          {selectedPage === "merch" && (
-            <>
-              <div className="mb-3">
-                <label className="form-label">Category</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Price</label>
-                <input
-                  type="number"
-                  className="form-control"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  required
-                />
-              </div>
-            </>
-          )}
+          {/* Navigation Tabs */}
+          <div className="dashboard-nav">
+            <div className="d-flex flex-wrap justify-content-center">
+              {["games", "news", "merch", "jobs"].map((page) => (
+                <button
+                  key={page}
+                  className={`nav-tab ${selectedPage === page ? "active" : ""}`}
+                  onClick={() => setSelectedPage(page)}
+                >
+                  {page.charAt(0).toUpperCase() + page.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
 
-
-
-
-          {/* Show category and price fields only when adding jobs */}
-          {selectedPage === "jobs" && (
-            <>
-              <div className="mb-3">
-                <label className="form-label">Location</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label">Position (Type)</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={position}
-                  onChange={(e) => setPosition(e.target.value)}
-                  required
-                />
-              </div>
-            </>
-          )}
-
-          <button type="submit" className="btn btn-danger">Add Item</button>
-        </form>
-
-        <h2 className="mt-5">Manage {selectedPage.charAt(0).toUpperCase() + selectedPage.slice(1)}</h2>
-        <div className="row g-4">
-          {items.map((item) => (
-            <div className="col-md-6" key={item._id}>
-              <div className="card bg-dark text-white h-100">
-                <img src={item.image} className="card-img-top" style={{ height: "300px", objectFit: "cover" }} alt={item.title} />
-                <div className="card-body bg-dark">
-                  <h5 className="card-title fw-bold mb-3">{item.title}</h5>
-                  <p className="card-text text-light opacity-75">{item.description}</p>
-                  {selectedPage === "merch" && <p className="fw-bold">Category: {item.category} | Price: ${item.price}</p>}
-                  {selectedPage === "jobs" && (
-                    <>
-                      <p className="text-danger mb-2">{item.location}</p>
-                      <p className="text-secondary mb-0">{item.type}</p>
-                    </>
-                  )}
-                  <button className="btn btn-danger mt-3" onClick={() => deleteItem(item._id)}>
-                    Delete
-                  </button>
+          {/* Add New Item Form */}
+          <div className="form-container">
+            <h2 className="form-title">Add New {selectedPage.charAt(0).toUpperCase() + selectedPage.slice(1)} Item</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="row">
+                <div className="col-md-6 mb-3">
+                  <label className="form-label">Title</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter item title"
+                    required
+                  />
+                </div>
+                <div className="col-md-6 mb-3">
+                  <label className="form-label">Image URL</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={image}
+                    onChange={(e) => setImage(e.target.value)}
+                    placeholder="Enter image URL"
+                  />
                 </div>
               </div>
-            </div>
-          ))}
+
+              {/* Short Description for Games only */}
+              {selectedPage === "games" && (
+                <div className="mb-3">
+                  <label className="form-label">Short Description (Header)</label>
+                  <textarea
+                    className="form-control"
+                    rows="2"
+                    value={shortDescription}
+                    onChange={(e) => setShortDescription(e.target.value)}
+                    placeholder="Enter a brief, engaging description for the game header (1-2 sentences)"
+                    required
+                  ></textarea>
+                </div>
+              )}
+
+              <div className="mb-3">
+                <label className="form-label">{selectedPage === "games" ? "Full Description (About Section)" : "Description"}</label>
+                <textarea
+                  className="form-control"
+                  rows="4"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder={selectedPage === "games" ? "Enter detailed description for the About This Game section" : "Enter item description"}
+                ></textarea>
+              </div>
+
+              {/* Conditional Fields */}
+              {selectedPage === "merch" && (
+                <>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Category</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        placeholder="e.g., Clothing, Accessories"
+                        required
+                      />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Price ($)</label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        className="form-control"
+                        value={price}
+                        onChange={(e) => setPrice(e.target.value)}
+                        placeholder="0.00"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Purchase Link (External Store)</label>
+                    <input
+                      type="url"
+                      className="form-control"
+                      value={purchaseLink}
+                      onChange={(e) => setPurchaseLink(e.target.value)}
+                      placeholder="https://store.example.com/product"
+                    />
+                  </div>
+                  <div className="row">
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Twitter Share Link</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={merchTwitterLink}
+                        onChange={(e) => setMerchTwitterLink(e.target.value)}
+                        placeholder="https://twitter.com/intent/tweet?text=..."
+                      />
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Facebook Share Link</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={merchFacebookLink}
+                        onChange={(e) => setMerchFacebookLink(e.target.value)}
+                        placeholder="https://facebook.com/sharer/sharer.php?u=..."
+                      />
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Instagram Link</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={merchInstagramLink}
+                        onChange={(e) => setMerchInstagramLink(e.target.value)}
+                        placeholder="https://instagram.com/p/..."
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {selectedPage === "jobs" && (
+                <>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Location</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={location}
+                        onChange={(e) => setLocation(e.target.value)}
+                        placeholder="e.g., Remote, New York, London"
+                        required
+                      />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Employment Type</label>
+                      <select
+                        className="form-control"
+                        value={position}
+                        onChange={(e) => setPosition(e.target.value)}
+                        required
+                      >
+                        <option value="">Select type</option>
+                        <option value="Full-Time">Full-Time</option>
+                        <option value="Part-Time">Part-Time</option>
+                        <option value="Contract">Contract</option>
+                        <option value="Internship">Internship</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Apply Link (URL)</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={applyLink}
+                        onChange={(e) => setApplyLink(e.target.value)}
+                        placeholder="https://careers.company.com/apply"
+                      />
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Company Website</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={companyWebsite}
+                        onChange={(e) => setCompanyWebsite(e.target.value)}
+                        placeholder="https://company.com"
+                      />
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Contact Email</label>
+                      <input
+                        type="email"
+                        className="form-control"
+                        value={contactEmail}
+                        onChange={(e) => setContactEmail(e.target.value)}
+                        placeholder="hr@company.com"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Game-specific link fields */}
+              {selectedPage === "games" && (
+                <>
+                  {/* Game Information Fields */}
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Genre</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={genre}
+                        onChange={(e) => setGenre(e.target.value)}
+                        placeholder="e.g., Action, Adventure, RPG"
+                      />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Platform</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={platform}
+                        onChange={(e) => setPlatform(e.target.value)}
+                        placeholder="e.g., PC, PlayStation, Xbox"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Release Date</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={releaseDate}
+                        onChange={(e) => setReleaseDate(e.target.value)}
+                        placeholder="e.g., Coming Soon, 2024, Q4 2024"
+                      />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Developer</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={developer}
+                        onChange={(e) => setDeveloper(e.target.value)}
+                        placeholder="e.g., Vagabond Studios"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Languages</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={languages}
+                        onChange={(e) => setLanguages(e.target.value)}
+                        placeholder="e.g., English, French, Spanish"
+                      />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">Age Rating</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={rating}
+                        onChange={(e) => setRating(e.target.value)}
+                        placeholder="e.g., Teen (T), Mature (M), Everyone (E)"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Game Features */}
+                  <div className="mb-3">
+                    <label className="form-label">Game Features (comma-separated)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      value={features}
+                      onChange={(e) => setFeatures(e.target.value)}
+                      placeholder="e.g., Immersive Gameplay, Stunning Graphics, Engaging Storyline, Multiplayer Support"
+                    />
+                  </div>
+
+                  {/* System Requirements */}
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">System Requirements - OS</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={systemReqOS}
+                        onChange={(e) => setSystemReqOS(e.target.value)}
+                        placeholder="e.g., Windows 10/11"
+                      />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">System Requirements - Memory</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={systemReqMemory}
+                        onChange={(e) => setSystemReqMemory(e.target.value)}
+                        placeholder="e.g., 8 GB RAM"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">System Requirements - Graphics</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={systemReqGraphics}
+                        onChange={(e) => setSystemReqGraphics(e.target.value)}
+                        placeholder="e.g., GTX 1060+"
+                      />
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label className="form-label">System Requirements - Storage</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={systemReqStorage}
+                        onChange={(e) => setSystemReqStorage(e.target.value)}
+                        placeholder="e.g., 50 GB"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Game Links */}
+                  <div className="row">
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Play/Download Link</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={playLink}
+                        onChange={(e) => setPlayLink(e.target.value)}
+                        placeholder="https://store.steampowered.com/app/..."
+                      />
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Wishlist Link</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={wishlistLink}
+                        onChange={(e) => setWishlistLink(e.target.value)}
+                        placeholder="https://store.steampowered.com/app/..."
+                      />
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Trailer/Video Link</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={trailerLink}
+                        onChange={(e) => setTrailerLink(e.target.value)}
+                        placeholder="https://youtube.com/watch?v=..."
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* News-specific link fields */}
+              {selectedPage === "news" && (
+                <>
+                  <div className="mb-3">
+                    <label className="form-label">External Source Link</label>
+                    <input
+                      type="url"
+                      className="form-control"
+                      value={externalLink}
+                      onChange={(e) => setExternalLink(e.target.value)}
+                      placeholder="https://original-source.com/article"
+                    />
+                  </div>
+                  <div className="row">
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Twitter Share Link</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={twitterLink}
+                        onChange={(e) => setTwitterLink(e.target.value)}
+                        placeholder="https://twitter.com/intent/tweet?text=..."
+                      />
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">Facebook Share Link</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={facebookLink}
+                        onChange={(e) => setFacebookLink(e.target.value)}
+                        placeholder="https://facebook.com/sharer/sharer.php?u=..."
+                      />
+                    </div>
+                    <div className="col-md-4 mb-3">
+                      <label className="form-label">LinkedIn Share Link</label>
+                      <input
+                        type="url"
+                        className="form-control"
+                        value={linkedinLink}
+                        onChange={(e) => setLinkedinLink(e.target.value)}
+                        placeholder="https://linkedin.com/sharing/share-offsite/?url=..."
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="text-center">
+                <button type="submit" className="btn-submit">
+                  Add {selectedPage.charAt(0).toUpperCase() + selectedPage.slice(1)} Item
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Items Management Section */}
+          <div className="mb-4">
+            <h2 className="section-title">
+              Manage {selectedPage.charAt(0).toUpperCase() + selectedPage.slice(1)} ({items.length})
+            </h2>
+            
+            {items.length === 0 ? (
+              <div className="text-center py-5">
+                <div className="text-white opacity-50">
+                  <i className="fas fa-inbox fa-3x mb-3"></i>
+                  <h4>No {selectedPage} items yet</h4>
+                  <p>Create your first {selectedPage} item using the form above.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="items-grid">
+                {items.map((item) => (
+                  <div className="item-card" key={item._id}>
+                    {item.image && (
+                      <img src={item.image} className="item-image" alt={item.title} />
+                    )}
+                    <div className="item-body">
+                      <h5 className="item-title">{item.title}</h5>
+                      <p className="item-description">{item.description}</p>
+                      
+                      {/* Item specific metadata */}
+                      <div className="item-meta">
+                        {selectedPage === "merch" && (
+                          <>
+                            <span className="meta-badge">{item.category}</span>
+                            <span className="meta-badge">${item.price}</span>
+                          </>
+                        )}
+                        {selectedPage === "jobs" && (
+                          <>
+                            <span className="meta-badge">{item.location}</span>
+                            <span className="meta-badge">{item.type}</span>
+                          </>
+                        )}
+                      </div>
+                      
+                      <button 
+                        className="btn-delete" 
+                        onClick={() => deleteItem(item._id)}
+                      >
+                        Delete Item
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
       <Footer />

@@ -8,19 +8,9 @@ export default function Games() {
     const [games, setGames] = useState([]);
     const [imageHeight, setImageHeight] = useState(window.innerWidth <= 576 ? "70vh" : "50vh");
 
-    // Function to determine the route for each game
-    const getGameRoute = (game, index) => {
-        if (game.title === "BUILT IN UNREAL ENGINE 5") {
-            return "/game1overview";
-        } else if (game.title === "NEW WEAPONS AND EQUIPMENT") {
-            return "/game2overview";
-        } else if (game.title === "Your Game Title") {
-            return "/game3overview";
-        } else if (game.title === "Your Game Title") {
-            return "/game4overview";
-        } else {
-            return "/soon"; // Default for any additional games
-        }
+    // Function to determine the route for each game - now uses dynamic routing
+    const getGameRoute = (game) => {
+        return `/games/${game._id}`; // Use the dynamic route with game ID
     };
 
     // Fetch games from the backend
@@ -65,8 +55,11 @@ export default function Games() {
                 <div className="row g-4">
                     {games.map((game, index) => (
                         <div className="col-md-6" key={index}>
-                            <Link to={getGameRoute(game, index)} style={{ textDecoration: "none"}}>
-                            <div className="card bg-dark text-white h-100">
+                            <Link to={getGameRoute(game)} style={{ textDecoration: "none"}}>
+                            <div className="card bg-dark text-white h-100" 
+                                 style={{cursor: 'pointer', transition: 'transform 0.2s'}}
+                                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+                                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                                 <img
                                     src={game.image} // Use the `image` field from your database
                                     className="card-img-top"
@@ -75,7 +68,12 @@ export default function Games() {
                                 />
                                 <div className="card-body bg-dark">
                                     <h5 className="card-title fw-bold mb-3">{game.title}</h5>
-                                    <p className="card-text text-light opacity-75">{game.description}</p>
+                                    <p className="card-text text-light opacity-75 mb-3">
+                                        {game.shortDescription || game.description}
+                                    </p>
+                                    <span className="btn btn-danger btn-sm">
+                                        {game.playLink ? 'Play Now →' : 'Download Now →'}
+                                    </span>
                                 </div>
                             </div>
                             </Link>

@@ -5,16 +5,20 @@ import Footer from "../components/footer";
 import { useCart } from "../context/CartContext";
 
 export default function ProductDetail() {
-  const { productId } = useParams();
+  const { productId, id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [imageHeight, setImageHeight] = useState(window.innerWidth <= 576 ? "70vh" : "50vh");
+  const [isInWishlist, setIsInWishlist] = useState(false);
   
   const { addToCart, getItemQuantity } = useCart();
 
+  // Use either productId or id parameter
+  const itemId = productId || id;
+
   useEffect(() => {
-    fetch(`http://localhost:5000/api/merch/${productId}`)
+    fetch(`http://localhost:5000/api/merch/${itemId}`)
       .then((response) => {
         if (!response.ok) {
           throw new Error('Product not found');
@@ -24,6 +28,10 @@ export default function ProductDetail() {
       .then((data) => {
         setProduct(data);
         setLoading(false);
+        
+        // Check if product is in wishlist
+        const wishlist = JSON.parse(localStorage.getItem('merchWishlist') || '[]');
+        setIsInWishlist(wishlist.some(p => p._id === data._id));
       })
       .catch((error) => {
         console.error("Error fetching product:", error);
@@ -32,6 +40,11 @@ export default function ProductDetail() {
   }, [productId]);
 
   const handleBuyNow = async () => {
+    if (product.purchaseLink) {
+      window.open(product.purchaseLink, '_blank');
+      return;
+    }
+    
     try {
       const response = await fetch('http://localhost:5000/api/create-checkout-session', {
         method: 'POST',
@@ -46,6 +59,26 @@ export default function ProductDetail() {
       }
     } catch (error) {
       console.error("Error creating checkout session:", error);
+    }
+  };
+
+  const toggleWishlist = () => {
+    const wishlist = JSON.parse(localStorage.getItem('merchWishlist') || '[]');
+    
+    if (!isInWishlist) {
+      wishlist.push(product);
+      localStorage.setItem('merchWishlist', JSON.stringify(wishlist));
+      setIsInWishlist(true);
+      // Dispatch event to update navbar counter
+      window.dispatchEvent(new Event('wishlistChanged'));
+      alert('Product added to wishlist!');
+    } else {
+      const updatedWishlist = wishlist.filter(p => p._id !== product._id);
+      localStorage.setItem('merchWishlist', JSON.stringify(updatedWishlist));
+      setIsInWishlist(false);
+      // Dispatch event to update navbar counter
+      window.dispatchEvent(new Event('wishlistChanged'));
+      alert('Product removed from wishlist!');
     }
   };
 
@@ -177,7 +210,14 @@ export default function ProductDetail() {
                       onClick={handleBuyNow}
                     >
                       <i className="bi bi-lightning me-2"></i>
-                      Buy Now
+                      {product.purchaseLink ? 'Buy on External Store' : 'Buy Now'}
+                    </button>
+                    <button
+                      className={`btn btn-lg ${isInWishlist ? 'btn-success' : 'btn-outline-light'}`}
+                      onClick={toggleWishlist}
+                    >
+                      <i className={`bi ${isInWishlist ? 'bi-heart-fill' : 'bi-heart'} me-2`}></i>
+                      {isInWishlist ? '✓ In Wishlist' : 'Add to Wishlist'}
                     </button>
                   </div>
                 </div>
@@ -187,7 +227,7 @@ export default function ProductDetail() {
 
           {/* Additional Product Info */}
           <div className="row mt-5">
-            <div className="col">
+            <div className="col-lg-8">
               <div className="card bg-dark border-secondary">
                 <div className="card-header bg-danger text-white">
                   <h4 className="mb-0">Product Information</h4>
@@ -208,6 +248,78 @@ export default function ProductDetail() {
                       <h6 className="text-danger">Shipping</h6>
                       <p className="text-light mb-3">Free shipping on orders over 200 USD</p>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-lg-4">
+              <div className="card bg-dark border-secondary">
+                <div className="card-body p-4">
+                  <h5 className="text-white mb-3">Share This Product</h5>
+                  <div className="d-grid gap-2">
+                    {product.socialLinks?.twitter ? (
+                      <a 
+                        href={product.socialLinks.twitter} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="btn btn-outline-light btn-sm"
+                      >
+                        <i className="bi bi-twitter me-2"></i>Twitter
+                      </a>
+                    ) : (
+                      <a 
+                        href={`https://twitter.com/intent/tweet?text=Check%20out%20${encodeURIComponent(product.title)}%20from%20Vagabond%20Studios!&url=${encodeURIComponent(window.location.href)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-outline-light btn-sm"
+                      >
+                        <i className="bi bi-twitter me-2"></i>Twitter
+                      </a>
+                    )}
+                    
+                    {product.socialLinks?.facebook ? (
+                      <a 
+                        href={product.socialLinks.facebook} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="btn btn-outline-light btn-sm"
+                      >
+                        <i className="bi bi-facebook me-2"></i>Facebook
+                      </a>
+                    ) : (
+                      <a 
+                        href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-outline-light btn-sm"
+                      >
+                        <i className="bi bi-facebook me-2"></i>Facebook
+                      </a>
+                    )}
+                    
+                    {product.socialLinks?.instagram ? (
+                      <a 
+                        href={product.socialLinks.instagram} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="btn btn-outline-light btn-sm"
+                      >
+                        <i className="bi bi-instagram me-2"></i>Instagram
+                      </a>
+                    ) : (
+                      <button 
+                        onClick={() => {
+                          const shareText = `Check out ${product.title} from Vagabond Studios! ${window.location.href}`;
+                          navigator.clipboard.writeText(shareText).then(() => {
+                            alert('Product link copied to clipboard!');
+                          });
+                        }}
+                        className="btn btn-outline-light btn-sm"
+                      >
+                        <i className="bi bi-link-45deg me-2"></i>Copy Link
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

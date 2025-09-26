@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Wishlist</title>
+</head>
+<body>
+    <h1>Wishlist Debug Tool</h1>
+    <button onclick="checkWishlist()">Check Wishlist Data</button>
+    <button onclick="clearWishlist()">Clear All Wishlist Data</button>
+    <button onclick="addTestGame()">Add Test Game</button>
+    <button onclick="addTestMerch()">Add Test Merch</button>
+    
+    <div id="output"></div>
+
+    <script>
+        function checkWishlist() {
+            const gameWishlist = JSON.parse(localStorage.getItem('gameWishlist') || '[]');
+            const merchWishlist = JSON.parse(localStorage.getItem('merchWishlist') || '[]');
+            
+            document.getElementById('output').innerHTML = `
+                <h2>Current Wishlist Data:</h2>
+                <h3>Games (${gameWishlist.length}):</h3>
+                <pre>${JSON.stringify(gameWishlist, null, 2)}</pre>
+                <h3>Merchandise (${merchWishlist.length}):</h3>
+                <pre>${JSON.stringify(merchWishlist, null, 2)}</pre>
+            `;
+        }
+
+        function clearWishlist() {
+            localStorage.removeItem('gameWishlist');
+            localStorage.removeItem('merchWishlist');
+            alert('Wishlist cleared!');
+            checkWishlist();
+        }
+
+        function addTestGame() {
+            const testGame = {
+                _id: 'test-game-1',
+                title: 'Test Game',
+                description: 'A test game for debugging',
+                image: '/images/test.jpg'
+            };
+            
+            const wishlist = JSON.parse(localStorage.getItem('gameWishlist') || '[]');
+            wishlist.push(testGame);
+            localStorage.setItem('gameWishlist', JSON.stringify(wishlist));
+            alert('Test game added!');
+            checkWishlist();
+        }
+
+        function addTestMerch() {
+            const testMerch = {
+                _id: 'test-merch-1',
+                title: 'Test Merchandise',
+                description: 'Test merchandise for debugging',
+                price: 25.99,
+                image: '/images/test.jpg'
+            };
+            
+            const wishlist = JSON.parse(localStorage.getItem('merchWishlist') || '[]');
+            wishlist.push(testMerch);
+            localStorage.setItem('merchWishlist', JSON.stringify(wishlist));
+            alert('Test merchandise added!');
+            checkWishlist();
+        }
+
+        // Auto-check on page load
+        window.onload = checkWishlist;
+    </script>
+</body>
+</html>
