@@ -58,68 +58,79 @@ export default function Navbar() {
                     {/* Centered Links */}
                     <ul className="navbar-nav mx-auto">
                         <li className="nav-item">
-                            <a className="nav-link mx-3" href="/Games">GAMES</a>
+                            <a className="nav-link mx-lg-3 py-2" href="/">HOME</a>
+                        </li>
+                        <li className="nav-item">
+                            <a className="nav-link mx-lg-3 py-2" href="/Games">GAMES</a>
                         </li>
 
                         {/* Dropdown for News */}
                         <li className="nav-item dropdown">
-                        <a className="nav-link dropdown-toggle mx-3" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            NEWS
-                        </a>
-                        <ul className="dropdown-menu bg-black">
-                            <li><a className="dropdown-item text-white bg-transparent" href="/news">Our News</a></li>
-                            <li><a className="dropdown-item text-white bg-transparent" href="/gamingnews">Gaming News</a></li>
-                        </ul>
+                            <a className="nav-link dropdown-toggle mx-lg-3 py-2" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                NEWS
+                            </a>
+                            <ul className="dropdown-menu bg-black border-secondary">
+                                <li><a className="dropdown-item text-white bg-transparent py-2" href="/news">Our News</a></li>
+                                <li><a className="dropdown-item text-white bg-transparent py-2" href="/gamingnews">Gaming News</a></li>
+                            </ul>
                         </li>
 
                         <li className="nav-item">
-                            <a className="nav-link mx-3" href="/merch">MERCH</a>
+                            <a className="nav-link mx-lg-3 py-2" href="/merch">MERCH</a>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link mx-3" href="/Hiring">WE'RE HIRING</a>
+                            <a className="nav-link mx-lg-3 py-2" href="/Hiring">WE'RE HIRING</a>
                         </li>
                         <li className="nav-item">
-                            <a className="nav-link mx-3" href="/Contact">CONTACT</a>
+                            <a className="nav-link mx-lg-3 py-2" href="/Contact">CONTACT</a>
                         </li>
                     </ul>
                     
                     {/* Cart, Wishlist and Discord Buttons */}
-                    <div className="d-flex flex-column flex-lg-row align-items-center justify-content-center mt-3 mt-lg-0">
-                        {/* Wishlist Button */}
-                        <a 
-                            href="/wishlist"
-                            className="btn btn-outline-light mb-2 mb-lg-0 me-lg-2 position-relative"
-                            title="My Wishlist"
-                        >
-                            ❤️
-                            {wishlistCount > 0 && (
-                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    {wishlistCount}
-                                </span>
-                            )}
-                        </a>
-                        
-                        {/* Cart Button */}
-                        <button 
-                            className="btn btn-outline-light mb-2 mb-lg-0 me-lg-3 position-relative"
-                            onClick={() => setIsCartOpen(true)}
-                        >
-                            🛒
-                            {getTotalItems() > 0 && (
-                                <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                    {getTotalItems()}
-                                </span>
-                            )}
-                        </button>
+                    <div className="d-flex flex-column flex-lg-row align-items-center justify-content-center mt-3 mt-lg-0 gap-2">
+                        {/* Mobile: Row layout for Wishlist and Cart */}
+                        <div className="d-flex gap-2 d-lg-contents">
+                            {/* Wishlist Button */}
+                            <a 
+                                href="/wishlist"
+                                className="btn btn-outline-light position-relative"
+                                title="My Wishlist"
+                                style={{ minWidth: '50px' }}
+                            >
+                                ❤️
+                                {wishlistCount > 0 && (
+                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {wishlistCount}
+                                    </span>
+                                )}
+                            </a>
+                            
+                            {/* Cart Button */}
+                            <button 
+                                className="btn btn-outline-light position-relative"
+                                onClick={() => setIsCartOpen(true)}
+                                style={{ minWidth: '50px' }}
+                            >
+                                🛒
+                                {getTotalItems() > 0 && (
+                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {getTotalItems()}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
                         
                         {/* Join Discord Button */}
                         <a 
-                        href="https://discord.gg/rYbMKFBh"  
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="btn bg-danger text-white px-4 py-2 d-inline-flex align-items-center border-0"
+                            href="https://discord.gg/rYbMKFBh"  
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="btn bg-danger text-white px-3 py-2 d-inline-flex align-items-center border-0 text-nowrap"
+                            style={{ fontSize: '0.9rem' }}
                         >
-                        <i className="fa-brands fa-discord me-2"></i> JOIN OUR DISCORD
+                            <i className="fa-brands fa-discord me-2"></i> 
+                            <span className="d-none d-sm-inline">JOIN OUR DISCORD</span>
+                            <span className="d-sm-none">DISCORD</span>
                         </a>
                     </div>
                 </div>

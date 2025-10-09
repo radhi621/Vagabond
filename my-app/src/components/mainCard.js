@@ -9,7 +9,7 @@ export default function MainCard() {
                             <div className="col-md-5 d-flex align-items-end">
                                 <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }} className="p-4">
                                     <h2 className="text-white mb-3">OUR FUNDAMENTAL VISION</h2>
-                                    <p className="text-white-50">Bellum is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
+                                    <p className="text-white-50">Vagabond Studio is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
                                 </div>
                             </div>
                         </div>
@@ -17,7 +17,7 @@ export default function MainCard() {
                 </div>
                 <div className="card-body d-md-none bg-black">
                     <h2 className="text-white mb-3">OUR FUNDAMENTAL VISION</h2>
-                    <p className="text-white-50">Bellum is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
+                    <p className="text-white-50">Vagabond Studio is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
                 </div>
             </div>
 
@@ -42,14 +42,14 @@ export default function MainCard() {
             </div>
 
             <div className="card text-bg-dark border-0 rounded-0">
-                <img src="../images/Carouselitem.jpg" className="card-img d-md-block" alt="Soldier at window" style={{objectFit: "cover",width: "100%",height: "70vh"}} />
+                <img src="../images/forest2.png" className="card-img d-md-block" alt="Soldier at window" style={{objectFit: "cover",width: "100%",height: "70vh"}} />
                 <div className="card-img-overlay d-none d-md-block">
                     <div className="container h-100">
                         <div className="row h-100 justify-content-end">
                             <div className="col-md-5 d-flex align-items-end">
                                 <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }} className="p-4">
                                     <h2 className="text-white mb-3">OUR FUNDAMENTAL VISION</h2>
-                                    <p className="text-white-50">Bellum is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
+                                    <p className="text-white-50">Vagabond Studio is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
                                 </div>
                             </div>
                         </div>
@@ -57,12 +57,12 @@ export default function MainCard() {
                 </div>
                 <div className="card-body d-md-none bg-black">
                     <h2 className="text-white mb-3">OUR FUNDAMENTAL VISION</h2>
-                    <p className="text-white-50">Bellum is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
+                    <p className="text-white-50">Vagabond Studio is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
                 </div>
             </div>
 
             <div className="card text-bg-dark border-0 rounded-0">
-                <img src="../images/Carouselitem.jpg" className="card-img d-md-block" alt="Soldiers at sunset" style={{objectFit: "cover",width: "100%",height: "70vh"}} />
+                <img src="../images/mountain.png" className="card-img d-md-block" alt="Soldiers at sunset" style={{objectFit: "cover",width: "100%",height: "70vh"}} />
                 <div className="card-img-overlay d-none d-md-block">
                     <div className="container h-100">
                         <div className="row h-100">
@@ -89,7 +89,7 @@ export default function MainCard() {
                             <div className="col-md-5 d-flex align-items-center">
                                 <div style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }} className="p-4 d-flex flex-column align-items-center">
                                     <h2 className="text-white mb-3">JOIN OUR COMMUNITY TODAY</h2>
-                                    <p className="text-white-50">Bellum is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
+                                    <p className="text-white-50">Vagabond Studio is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
                                     <div className="d-flex justify-content-center">
                                         <button className="nav-item bg-danger text-white border border-0 p-2">
                                             <a className="nav-link" href="/"><i className="fa-brands fa-discord"></i> JOIN OUR DISCORD</a>
@@ -102,7 +102,7 @@ export default function MainCard() {
                 </div>
                 <div className="card-body d-md-none bg-black d-flex flex-column align-items-center">
                     <h2 className="text-white mb-3">OUR FUNDAMENTAL VISION</h2>
-                    <p className="text-white-50">Bellum is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
+                    <p className="text-white-50">Vagabond Studio is created by first responder special operations units to create realistic and authentic military experiences from years of service.</p>
                     <div className="d-flex justify-content-center">
                         <button className="nav-item bg-danger text-white border border-0 p-2">
                             <a className="nav-link" href="/"><i className="fa-brands fa-discord"></i> JOIN OUR DISCORD</a>

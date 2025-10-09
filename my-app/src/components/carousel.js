@@ -55,7 +55,7 @@ export default function VideoCarousel() {
                 height: videoHeight,
               }}
             >
-              <source src="/videos/carousel.mp4" type="video/mp4" />
+              <source src="/videos/tt.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             <div className="carousel-caption d-none d-md-block">
@@ -78,7 +78,7 @@ export default function VideoCarousel() {
                 height: videoHeight,
               }}
             >
-              <source src="/videos/carousel.mp4" type="video/mp4" />
+              <source src="/videos/tt.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             <div className="carousel-caption d-none d-md-block">
@@ -101,7 +101,7 @@ export default function VideoCarousel() {
                 height: videoHeight,
               }}
             >
-              <source src="/videos/carousel.mp4" type="video/mp4" />
+              <source src="/videos/tt.mp4" type="video/mp4" />
               Your browser does not support the video tag.
             </video>
             <div className="carousel-caption d-none d-md-block">

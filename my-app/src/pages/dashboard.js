@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import { getToken } from '../utils/auth';
+import { getToken, removeToken } from '../utils/auth';
 import { useNavigate } from 'react-router-dom';
 import '../styles/dashboard.css';
 
@@ -18,6 +18,10 @@ export default function Dashboard() {
   const [salary, setSalary] = useState(""); // Job-specific field
   const [selectedPage, setSelectedPage] = useState("games");
   const [stats, setStats] = useState({ games: 0, news: 0, merch: 0, jobs: 0 });
+
+  // Edit mode states
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingItemId, setEditingItemId] = useState(null);
 
   // Link fields for games
   const [playLink, setPlayLink] = useState("");
@@ -56,12 +60,65 @@ export default function Dashboard() {
 
   const navigate = useNavigate();
   const [authorized, setAuthorized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Helper function to get auth headers
+  const getAuthHeaders = () => {
+    const token = getToken();
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': token || ''
+    };
+  };
+
+  // Function to clear all form fields
+  const clearForm = () => {
+    setTitle("");
+    setShortDescription("");
+    setDescription("");
+    setImage("");
+    setCategory("");
+    setPrice("");
+    setPosition("");
+    setLocation("");
+    setSalary("");
+    setPlayLink("");
+    setWishlistLink("");
+    setTrailerLink("");
+    setGenre("");
+    setPlatform("");
+    setReleaseDate("");
+    setDeveloper("");
+    setLanguages("");
+    setRating("");
+    setFeatures("");
+    setSystemReqOS("");
+    setSystemReqMemory("");
+    setSystemReqGraphics("");
+    setSystemReqStorage("");
+    setExternalLink("");
+    setTwitterLink("");
+    setFacebookLink("");
+    setLinkedinLink("");
+    setApplyLink("");
+    setCompanyWebsite("");
+    setContactEmail("");
+    setPurchaseLink("");
+    setMerchTwitterLink("");
+    setMerchFacebookLink("");
+    setMerchInstagramLink("");
+    setIsEditMode(false);
+    setEditingItemId(null);
+  };
 
   useEffect(() => {
     fetch(`http://localhost:5000/api/${selectedPage}`)
       .then((response) => response.json())
       .then((data) => setItems(data))
       .catch((error) => console.error(`Error fetching ${selectedPage}:`, error));
+    
+    // Clear form when switching pages
+    clearForm();
   }, [selectedPage]);
 
   // Fetch stats for all categories
@@ -92,38 +149,114 @@ export default function Dashboard() {
 
 useEffect(() => {
   const token = getToken();
+  
   if (!token) {
-    alert("Access denied. Please log in as an admin.");
-    navigate('/');
-  } else {
-    fetch("http://localhost:5000/api/dashboard", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,  // Fixed: Added Bearer prefix
-      },
-    })
-      .then((res) => {
-        if (res.status === 401 || res.status === 403) throw new Error("Unauthorized");
-        return res.json();
-      })
-      .then(() => setAuthorized(true))
-      .catch(() => {
-        alert("Access denied. Admins only.");
-        navigate('/');
-      });
+    setIsLoading(false);
+    navigate('/admin-login');
+    return;
   }
+
+  // Verify token with server
+  fetch("http://localhost:5000/api/admin/verify", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token,
+    },
+  })
+    .then((res) => {
+      if (!res.ok) {
+        throw new Error("Unauthorized");
+      }
+      return res.json();
+    })
+    .then(() => {
+      setAuthorized(true);
+      setIsLoading(false);
+    })
+    .catch((error) => {
+      console.error("Authentication failed:", error);
+      removeToken();
+      setIsLoading(false);
+      navigate('/admin-login');
+    });
 }, [navigate]);
+
+if (isLoading) {
+  return (
+    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', backgroundColor: '#000' }}>
+      <div className="text-white">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+        <p className="mt-3">Verifying authentication...</p>
+      </div>
+    </div>
+  );
+}
+
 if (!authorized) return null;
 
+  // Function to populate form with item data for editing
+  const handleEdit = (item) => {
+    setIsEditMode(true);
+    setEditingItemId(item._id);
+    setTitle(item.title || "");
+    setDescription(item.description || "");
+    setImage(item.image || "");
+
+    // Scroll to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    if (selectedPage === "games") {
+      setShortDescription(item.shortDescription || "");
+      setGenre(item.genre || "");
+      setPlatform(item.platform || "");
+      setReleaseDate(item.releaseDate || "");
+      setDeveloper(item.developer || "");
+      setLanguages(item.languages || "");
+      setRating(item.rating || "");
+      setFeatures(item.features ? item.features.join(', ') : "");
+      setPlayLink(item.playLink || "");
+      setWishlistLink(item.wishlistLink || "");
+      setTrailerLink(item.trailerLink || "");
+      setSystemReqOS(item.systemRequirements?.os || "");
+      setSystemReqMemory(item.systemRequirements?.memory || "");
+      setSystemReqGraphics(item.systemRequirements?.graphics || "");
+      setSystemReqStorage(item.systemRequirements?.storage || "");
+    } else if (selectedPage === "merch") {
+      setCategory(item.category || "");
+      setPrice(item.price || "");
+      setPurchaseLink(item.purchaseLink || "");
+      setMerchTwitterLink(item.socialLinks?.twitter || "");
+      setMerchFacebookLink(item.socialLinks?.facebook || "");
+      setMerchInstagramLink(item.socialLinks?.instagram || "");
+    } else if (selectedPage === "news") {
+      setExternalLink(item.externalLink || "");
+      setTwitterLink(item.socialLinks?.twitter || "");
+      setFacebookLink(item.socialLinks?.facebook || "");
+      setLinkedinLink(item.socialLinks?.linkedin || "");
+    } else if (selectedPage === "jobs") {
+      setLocation(item.location || "");
+      setPosition(item.type || "");
+      setApplyLink(item.applyLink || "");
+      setCompanyWebsite(item.companyWebsite || "");
+      setContactEmail(item.contactEmail || "");
+    }
+  };
+
+  // Function to cancel edit mode
+  const handleCancelEdit = () => {
+    clearForm();
+  };
 
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    let newItem = {};
+    let itemData = {};
     
     if (selectedPage === "jobs") {
-      newItem = { 
+      itemData = { 
         title, 
         location, 
         type: position, 
@@ -134,7 +267,7 @@ if (!authorized) return null;
         contactEmail 
       };
     } else if (selectedPage === "merch") {
-      newItem = { 
+      itemData = { 
         title, 
         description, 
         image, 
@@ -148,7 +281,7 @@ if (!authorized) return null;
         }
       };
     } else if (selectedPage === "games") {
-      newItem = { 
+      itemData = { 
         title, 
         shortDescription,
         description, 
@@ -158,23 +291,23 @@ if (!authorized) return null;
       };
 
       // Only add fields that have values
-      if (genre) newItem.genre = genre;
-      if (platform) newItem.platform = platform;
-      if (releaseDate) newItem.releaseDate = releaseDate;
-      if (developer) newItem.developer = developer;
-      if (languages) newItem.languages = languages;
-      if (rating) newItem.rating = rating;
-      if (playLink) newItem.playLink = playLink;
-      if (wishlistLink) newItem.wishlistLink = wishlistLink;
-      if (trailerLink) newItem.trailerLink = trailerLink;
+      if (genre) itemData.genre = genre;
+      if (platform) itemData.platform = platform;
+      if (releaseDate) itemData.releaseDate = releaseDate;
+      if (developer) itemData.developer = developer;
+      if (languages) itemData.languages = languages;
+      if (rating) itemData.rating = rating;
+      if (playLink) itemData.playLink = playLink;
+      if (wishlistLink) itemData.wishlistLink = wishlistLink;
+      if (trailerLink) itemData.trailerLink = trailerLink;
       
       // Only add system requirements that have values
-      if (systemReqOS) newItem.systemRequirements.os = systemReqOS;
-      if (systemReqMemory) newItem.systemRequirements.memory = systemReqMemory;
-      if (systemReqGraphics) newItem.systemRequirements.graphics = systemReqGraphics;
-      if (systemReqStorage) newItem.systemRequirements.storage = systemReqStorage;
+      if (systemReqOS) itemData.systemRequirements.os = systemReqOS;
+      if (systemReqMemory) itemData.systemRequirements.memory = systemReqMemory;
+      if (systemReqGraphics) itemData.systemRequirements.graphics = systemReqGraphics;
+      if (systemReqStorage) itemData.systemRequirements.storage = systemReqStorage;
     } else if (selectedPage === "news") {
-      newItem = { 
+      itemData = { 
         title, 
         description, 
         image, 
@@ -187,66 +320,55 @@ if (!authorized) return null;
       };
     }
 
+    // Determine if we're updating or creating
+    const url = isEditMode 
+      ? `http://localhost:5000/api/${selectedPage}/${editingItemId}`
+      : `http://localhost:5000/api/${selectedPage}`;
+    
+    const method = isEditMode ? "PUT" : "POST";
 
-    fetch(`http://localhost:5000/api/${selectedPage}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newItem),
+    fetch(url, {
+      method: method,
+      headers: getAuthHeaders(),
+      body: JSON.stringify(itemData),
     })
       .then((response) => {
-        if (!response.ok) throw new Error("Failed to add item");
+        if (response.status === 401 || response.status === 403) {
+          alert("Session expired. Please login again.");
+          removeToken();
+          navigate('/admin-login');
+          throw new Error("Unauthorized");
+        }
+        if (!response.ok) throw new Error(isEditMode ? "Failed to update item" : "Failed to add item");
         return response.json();
       })
       .then((data) => {
-        setItems([...items, data]);
-        // Clear all form fields
-        setTitle("");
-        setShortDescription("");
-        setDescription("");
-        setImage("");
-        setCategory("");
-        setPrice("");
-        setPosition("");
-        setLocation("");
-        setSalary("");
-        setPlayLink("");
-        setWishlistLink("");
-        setTrailerLink("");
-        // Clear game-specific fields
-        setGenre("");
-        setPlatform("");
-        setReleaseDate("");
-        setDeveloper("");
-        setLanguages("");
-        setRating("");
-        setFeatures("");
-        setSystemReqOS("");
-        setSystemReqMemory("");
-        setSystemReqGraphics("");
-        setSystemReqStorage("");
-        setExternalLink("");
-        setTwitterLink("");
-        setFacebookLink("");
-        setLinkedinLink("");
-        setApplyLink("");
-        setCompanyWebsite("");
-        setContactEmail("");
-        setPurchaseLink("");
-        setMerchTwitterLink("");
-        setMerchFacebookLink("");
-        setMerchInstagramLink("");
+        if (isEditMode) {
+          // Update the item in the list
+          setItems(items.map(item => item._id === editingItemId ? data : item));
+        } else {
+          // Add new item to the list
+          setItems([...items, data]);
+        }
+        // Clear form
+        clearForm();
       })
-      .catch((error) => console.error("Error adding item:", error));
+      .catch((error) => console.error(isEditMode ? "Error updating item:" : "Error adding item:", error));
   };
 
   const deleteItem = (id) => {
     console.log("Deleting item with ID:", id);  // Log the ID being passed
     fetch(`http://localhost:5000/api/${selectedPage}/${id}`, {
       method: "DELETE",
+      headers: getAuthHeaders(),
     })
       .then((response) => {
+        if (response.status === 401 || response.status === 403) {
+          alert("Session expired. Please login again.");
+          removeToken();
+          navigate('/admin-login');
+          throw new Error("Unauthorized");
+        }
         if (!response.ok) throw new Error("Failed to delete item");
         return response.json();
       })
@@ -256,15 +378,31 @@ if (!authorized) return null;
       .catch((error) => console.error("Error deleting item:", error));
   };
 
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      removeToken();
+      navigate('/admin-login');
+    }
+  };
+
   return (
     <>
       <Navbar />
       <div className="dashboard-container">
         {/* Dashboard Header */}
         <div className="dashboard-header">
-          <div className="container">
-            <h1 className="display-4 fw-bold text-white mb-0">Admin Dashboard</h1>
-            <p className="text-light opacity-75 mb-0">Manage your game studio content</p>
+          <div className="container d-flex justify-content-between align-items-center">
+            <div>
+              <h1 className="display-4 fw-bold text-white mb-0">Admin Dashboard</h1>
+              <p className="text-light opacity-75 mb-0">Manage your game studio content</p>
+            </div>
+            <button 
+              onClick={handleLogout}
+              className="btn btn-outline-light d-flex align-items-center gap-2"
+            >
+              <i className="fas fa-sign-out-alt"></i>
+              <span className="d-none d-md-inline">Logout</span>
+            </button>
           </div>
         </div>
 
@@ -306,7 +444,25 @@ if (!authorized) return null;
 
           {/* Add New Item Form */}
           <div className="form-container">
-            <h2 className="form-title">Add New {selectedPage.charAt(0).toUpperCase() + selectedPage.slice(1)} Item</h2>
+            <h2 className="form-title">
+              {isEditMode ? (
+                <>
+                  <i className="fas fa-edit me-2"></i>
+                  Edit {selectedPage.charAt(0).toUpperCase() + selectedPage.slice(1)} Item
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-plus-circle me-2"></i>
+                  Add New {selectedPage.charAt(0).toUpperCase() + selectedPage.slice(1)} Item
+                </>
+              )}
+            </h2>
+            {isEditMode && (
+              <div className="alert alert-info mb-3">
+                <i className="fas fa-info-circle me-2"></i>
+                You are currently editing an item. Make your changes and click "Update" to save.
+              </div>
+            )}
             <form onSubmit={handleSubmit}>
               <div className="row">
                 <div className="col-md-6 mb-3">
@@ -714,8 +870,28 @@ if (!authorized) return null;
 
               <div className="text-center">
                 <button type="submit" className="btn-submit">
-                  Add {selectedPage.charAt(0).toUpperCase() + selectedPage.slice(1)} Item
+                  {isEditMode ? (
+                    <>
+                      <i className="fas fa-save me-2"></i>
+                      Update {selectedPage.charAt(0).toUpperCase() + selectedPage.slice(1)} Item
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-plus me-2"></i>
+                      Add {selectedPage.charAt(0).toUpperCase() + selectedPage.slice(1)} Item
+                    </>
+                  )}
                 </button>
+                {isEditMode && (
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary ms-3"
+                    onClick={handleCancelEdit}
+                  >
+                    <i className="fas fa-times me-2"></i>
+                    Cancel
+                  </button>
+                )}
               </div>
             </form>
           </div>
@@ -761,12 +937,26 @@ if (!authorized) return null;
                         )}
                       </div>
                       
-                      <button 
-                        className="btn-delete" 
-                        onClick={() => deleteItem(item._id)}
-                      >
-                        Delete Item
-                      </button>
+                      <div className="d-flex gap-2 mt-3">
+                        <button 
+                          className="btn btn-primary flex-fill"
+                          onClick={() => handleEdit(item)}
+                        >
+                          <i className="fas fa-edit me-2"></i>
+                          Edit
+                        </button>
+                        <button 
+                          className="btn btn-danger flex-fill" 
+                          onClick={() => {
+                            if (window.confirm(`Are you sure you want to delete "${item.title}"?`)) {
+                              deleteItem(item._id);
+                            }
+                          }}
+                        >
+                          <i className="fas fa-trash me-2"></i>
+                          Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

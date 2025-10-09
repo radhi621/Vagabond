@@ -123,35 +123,97 @@ const Job = mongoose.model("Job", jobSchema);
 
 
 
+// Middleware to verify admin authentication
 function verifyAdmin(req, res, next) {
-  const token = req.headers['authorization'];
-  if (!token) return res.status(401).json({ error: 'Access denied. No token provided.' });
+  const authHeader = req.headers['authorization'];
+  
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Access denied. No token provided.' });
+  }
+
+  // Extract token from "Bearer TOKEN" format
+  const token = authHeader.startsWith('Bearer ') 
+    ? authHeader.slice(7) 
+    : authHeader;
+
+  if (!token) {
+    return res.status(401).json({ error: 'Access denied. Invalid token format.' });
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
     if (decoded.role !== 'admin') {
       return res.status(403).json({ error: 'Access denied. Admins only.' });
     }
+    
     req.user = decoded;
     next();
   } catch (err) {
-    res.status(400).json({ error: 'Invalid token.' });
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token expired. Please login again.' });
+    }
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Invalid token. Please login again.' });
+    }
+    return res.status(400).json({ error: 'Authentication failed.' });
   }
 }
 
 
-// admin login for dashboard
+// Admin login endpoint
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
+  
+  // Validate input
+  if (!username || !password) {
+    return res.status(400).json({ error: 'Username and password are required' });
+  }
+
+  // Check credentials against environment variables
   if (
     username === process.env.ADMIN_USERNAME &&
     password === process.env.ADMIN_PASSWORD
   ) {
-    const token = jwt.sign({ role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    return res.json({ token });
+    // Generate JWT token with 8 hour expiration
+    const token = jwt.sign(
+      { 
+        role: 'admin',
+        username: username,
+        iat: Math.floor(Date.now() / 1000)
+      }, 
+      process.env.JWT_SECRET, 
+      { expiresIn: '8h' }
+    );
+    
+    return res.json({ 
+      success: true,
+      token,
+      expiresIn: '8h',
+      message: 'Login successful'
+    });
   }
 
-  res.status(401).json({ error: 'Invalid credentials' });
+  // Invalid credentials
+  res.status(401).json({ error: 'Invalid username or password' });
+});
+
+// Verify token endpoint (to check if user is still authenticated)
+app.post('/api/admin/verify', verifyAdmin, (req, res) => {
+  res.json({ 
+    success: true,
+    valid: true,
+    user: req.user,
+    message: 'Token is valid'
+  });
+});
+
+// Logout endpoint (optional - mainly for client-side token removal)
+app.post('/api/admin/logout', verifyAdmin, (req, res) => {
+  res.json({ 
+    success: true,
+    message: 'Logged out successfully'
+  });
 });
 
 
@@ -190,7 +252,7 @@ app.get("/api/games/:id", async (req, res) => {
   }
 });
 
-app.post("/api/games", async (req, res) => { // sends data to server (create)
+app.post("/api/games", verifyAdmin, async (req, res) => { // sends data to server (create)
   const { 
     title, 
     shortDescription,
@@ -243,7 +305,7 @@ app.post("/api/games", async (req, res) => { // sends data to server (create)
   }
 });
 
-app.delete("/api/games/:id", async (req, res) => { // deletes data from server (delete)
+app.delete("/api/games/:id", verifyAdmin, async (req, res) => { // deletes data from server (delete)
   try {
     const { id } = req.params;
     const result = await Game.findByIdAndDelete(id);
@@ -254,6 +316,63 @@ app.delete("/api/games/:id", async (req, res) => { // deletes data from server (
   } catch (err) {
     console.error("Error deleting game:", err);
     res.status(500).json({ error: "Failed to delete game" });
+  }
+});
+
+// Update a game
+app.put("/api/games/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { 
+      title, 
+      shortDescription,
+      description, 
+      image, 
+      genre,
+      platform,
+      releaseDate,
+      developer,
+      languages,
+      rating,
+      features,
+      systemRequirements,
+      playLink, 
+      wishlistLink, 
+      trailerLink 
+    } = req.body;
+
+    if (!title || !shortDescription || !description || !image) {
+      return res.status(400).json({ error: "Title, short description, description, and image are required" });
+    }
+
+    const gameData = { 
+      title, 
+      shortDescription,
+      description, 
+      image,
+      features: features || [],
+      systemRequirements: systemRequirements || {}
+    };
+
+    // Only add fields that have values
+    if (genre) gameData.genre = genre;
+    if (platform) gameData.platform = platform;
+    if (releaseDate) gameData.releaseDate = releaseDate;
+    if (developer) gameData.developer = developer;
+    if (languages) gameData.languages = languages;
+    if (rating) gameData.rating = rating;
+    if (playLink) gameData.playLink = playLink;
+    if (wishlistLink) gameData.wishlistLink = wishlistLink;
+    if (trailerLink) gameData.trailerLink = trailerLink;
+
+    const updatedGame = await Game.findByIdAndUpdate(id, gameData, { new: true });
+    if (!updatedGame) {
+      return res.status(404).json({ error: "Game not found" });
+    }
+    res.json(updatedGame);
+  } catch (err) {
+    console.error("Error updating game:", err);
+    res.status(500).json({ error: "Failed to update game" });
   }
 });
 
@@ -283,7 +402,7 @@ app.get("/api/news/:id", async (req, res) => {
   }
 });
 
-app.post("/api/news", async (req, res) => {
+app.post("/api/news", verifyAdmin, async (req, res) => {
   const { title, description, image, externalLink, socialLinks } = req.body;
   if (!title || !description || !image) {
     return res.status(400).json({ error: "All fields are required" });
@@ -304,7 +423,7 @@ app.post("/api/news", async (req, res) => {
   }
 });
 
-app.delete("/api/news/:id", async (req, res) => {
+app.delete("/api/news/:id", verifyAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await News.findByIdAndDelete(id);
@@ -318,8 +437,33 @@ app.delete("/api/news/:id", async (req, res) => {
   }
 });
 
+// Update a news article
+app.put("/api/news/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, image, externalLink, socialLinks } = req.body;
+    if (!title || !description || !image) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+    
+    const updateData = { 
+      title, 
+      description, 
+      image, 
+      externalLink,
+      socialLinks: socialLinks || {}
+    };
 
-
+    const updatedNews = await News.findByIdAndUpdate(id, updateData, { new: true });
+    if (!updatedNews) {
+      return res.status(404).json({ error: "News article not found" });
+    }
+    res.json(updatedNews);
+  } catch (err) {
+    console.error("Error updating news:", err);
+    res.status(500).json({ error: "Failed to update news" });
+  }
+});
 
 
 
@@ -351,7 +495,7 @@ app.get("/api/merch/:id", async (req, res) => {
 });
 
 // Add a new merch item
-app.post("/api/merch", async (req, res) => {
+app.post("/api/merch", verifyAdmin, async (req, res) => {
   const { title, description, image, category, price, purchaseLink, socialLinks } = req.body;
   if (!title || !description || !image || !category || !price) {
     return res.status(400).json({ error: "All fields are required" });
@@ -375,7 +519,7 @@ app.post("/api/merch", async (req, res) => {
 });
 
 // Delete a merch item
-app.delete("/api/merch/:id", async (req, res) => {
+app.delete("/api/merch/:id", verifyAdmin, async (req, res) => {
   try {
     const { id } = req.params;
     const result = await Merch.findByIdAndDelete(id);
@@ -389,14 +533,41 @@ app.delete("/api/merch/:id", async (req, res) => {
   }
 });
 
+// Update a merch item
+app.put("/api/merch/:id", verifyAdmin, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description, image, category, price, purchaseLink, socialLinks } = req.body;
+    if (!title || !description || !image || !category || !price) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+    
+    const updateData = { 
+      title, 
+      description, 
+      image, 
+      category, 
+      price, 
+      purchaseLink,
+      socialLinks: socialLinks || {}
+    };
 
-
+    const updatedMerch = await Merch.findByIdAndUpdate(id, updateData, { new: true });
+    if (!updatedMerch) {
+      return res.status(404).json({ error: "Merch item not found" });
+    }
+    res.json(updatedMerch);
+  } catch (err) {
+    console.error("Error updating merch:", err);
+    res.status(500).json({ error: "Failed to update merch" });
+  }
+});
 
 
 
 
 // POST /api/jobs - Create a new job
-app.post("/api/jobs", async (req, res) => {
+app.post("/api/jobs", verifyAdmin, async (req, res) => {
   const { title, location, type, description, image, applyLink, companyWebsite, contactEmail, salary, department } = req.body;
   if (!title || !location || !type) {
     return res.status(400).json({ error: "All fields (title, location, type) are required" });
@@ -440,7 +611,7 @@ app.get("/api/jobs", async (req, res) => {
 });
 
 // PUT /api/jobs/:id - Update a job
-app.put("/api/jobs/:id", async (req, res) => {
+app.put("/api/jobs/:id", verifyAdmin, async (req, res) => {
   const { id } = req.params;
   const { title, location, type, description, image, applyLink, companyWebsite, contactEmail, salary, department } = req.body;
 
@@ -488,7 +659,7 @@ app.get("/api/jobs/:id", async (req, res) => {
 });
 
 // DELETE /api/jobs/:id - Delete a job by ID
-app.delete("/api/jobs/:id", async (req, res) => {
+app.delete("/api/jobs/:id", verifyAdmin, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await Job.findByIdAndDelete(id);
